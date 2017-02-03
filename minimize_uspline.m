@@ -1,22 +1,21 @@
 % main routine
 
-clear
 JN_and_dJN_globals
 
 
 % Test parameters
 qtest = ones(1,M+2);
-utest = zeros(1,P+1);
+ctest = zeros(1,P+1);
 
-parms_init = [qtest,utest];
+parms_init = [qtest,ctest];
 
 
 
 % Options for constrained minimization
 Aineq = [];
 Bineq = [];
-LB = [eps*ones(size(qtest)),zeros(size(utest))];
-UB = [inf*ones(size(qtest)),inf*ones(size(utest))];
+LB = [eps*ones(size(qtest)),zeros(size(ctest))];
+UB = [inf*ones(size(qtest)),inf*ones(size(ctest))];
 NONLCON = [];
 Aeq = [];
 Beq = [];
@@ -34,7 +33,7 @@ OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3
 global SplinesP
 q2_star = parms_star(1)
 q1M_star = parms_star(2:M+2)
-u_star  = SplinesP*parms_star(M+3:end);
+u_star  = parms_star(M+3:end)*SplinesP;
 
 
 
@@ -60,7 +59,7 @@ plot(u_star)
 % plot(u_star_sg)
 
 xlim([0,length(test_u)])
-plot(test_u,'.')
+plot(test_u)
 %plot(test_y)
 
 

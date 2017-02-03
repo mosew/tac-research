@@ -32,8 +32,8 @@ qM = qu(2:M+2);
 c = qu((M+3):end);
 % c is a vector of spline coefficients
 assert(length(c)==P+1);
-test_u_sampled=sample_u_spline(c)';
-total_u = [training_u(:,1:n+1);test_u_sampled,0];
+test_u_sampled=sample_u_spline(c);
+total_u = [training_u;test_u_sampled];
 
 
 Kq = build_Kq(qM);
@@ -58,10 +58,10 @@ end
 
 
 % COMPUTE GRADIENT CONTRIBUTIONS
-dJN = zeros(1,M+2+P); % one for each component of (qM,u)
+dJN = zeros(1,M+3+P); % one for each component of (qM,u)
 JN=0;
 
-for j=P:-1:1
+for j=n:-1:1
     
     for i=1:m+1
         % Running everything backwards, we begin at timestep n+1.
@@ -72,10 +72,12 @@ for j=P:-1:1
         JN = JN + (CNhat*Phi(:,j+1,i)-Y(i,j+1))^2; %Note that this excludes j=1, i.e. t=0, because there is no output then.
     end
     eta(:,j,m+1)=ANhat' * eta(:,j+1,m+1) + 2*(CNhat*Phi(:,j,m+1)-test_y(j))*CNhat';
-    dJN(j+M+2) = dJN(j+M+2) + eta(:,j+1,m+1)'*BNhat*SplinesP(:,j+1);
+    for r=0:P
+        dJN(r+M+3) = dJN(r+M+3) + eta(:,j+1,m+1)'*BNhat*SplinesP(r+1,j+1);
+    end
 end
 
-JN = JN + Reg(qM,test_u_sampled);
-dJN = dJN + dReg(qM,test_u_sampled);
+%JN = JN + Reg(qM,test_u_sampled);
+%dJN = dJN + dReg(qM,test_u_sampled);
 
 end

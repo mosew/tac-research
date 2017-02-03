@@ -11,4 +11,4 @@ BN = build_BN(q2);
 [ANhat,dANhat_dqM] = build_expm_stuff(AN);
 BNhat = build_BNhat(AN,ANhat,BN);
 dBNhat_dqM = build_dBNhat_dqM(AN,ANhat,dANhat_dqM,BN);
-Phi = build_Phi(ANhat,BNhat,[training_u;[sample_u_spline(c)',0]]);
+Phi = build_Phi(ANhat,BNhat,[training_u;sample_u_spline(c)]);

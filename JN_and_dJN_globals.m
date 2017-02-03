@@ -5,15 +5,15 @@ global tau M N P
     tau=5; % timestep (in MINUTES)
     N=32; % state and evolution operator discretization index
     M=1; % Q discretization index
-    P=9; % U discretization index
+    P=15; % U discretization index.  is the number of splines per hour.
 
 % Set training and test sets
-% global training test total
-training = 3;
-test = 3;
-total=3; %used for setting max time window. needs to be a RANGE that includes training and test indices.
+ global training test total
+% training = 1:11;
+% test = 1;
+% total=1:11; %used for setting max time window. needs to be a RANGE that includes training and test indices.
 
-[t,u_total,y_total] = prepare_data(t_TAC_5122(total),t_BrAC_5122(total),data_TAC_5122(total),data_BrAC_5122(total),5,tau);
+[~,u_total,y_total] = prepare_data(t_TAC_5122(total),t_BrAC_5122(total),data_TAC_5122(total),data_BrAC_5122(total),5,tau);
 
 training = training-total(1)+1;
 test = test-total(1)+1;

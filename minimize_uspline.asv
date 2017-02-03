@@ -6,7 +6,7 @@ JN_and_dJN_globals
 
 % Test parameters
 qtest = ones(1,M+2);
-utest = zeros(1,n);
+utest = zeros(1,P);
 
 parms_init = [qtest,utest];
 

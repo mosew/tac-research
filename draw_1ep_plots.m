@@ -1,4 +1,5 @@
 global training test total
+figure
 for i=1:10
     training = i:i+1;
     test = i;

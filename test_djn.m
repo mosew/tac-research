@@ -3,7 +3,7 @@ global M n
 p0=ones(1,M+2+n);
 [jn0,djn0]=JN_and_dJN(p0);
 
-epsilon=10^(-9);
+epsilon=10^(-6);
 delta_jn = zeros(1,M+2+n);
 
 for k=1:(M+2+n)

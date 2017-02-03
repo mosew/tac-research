@@ -1,16 +1,17 @@
 clear
 load('5122.mat')
 
-global tau M N
+global tau M N P
     tau=5; % timestep (in MINUTES)
     N=32; % state and evolution operator discretization index
     M=1; % Q discretization index
+    P=9; % U discretization index
 
 % Set training and test sets
 % global training test total
- training = 1:11;
- test = 1;
- total=1:11; %used for setting max time window. this needs to be a RANGE that includes the training and test indices.
+training = 3;
+test = 3;
+total=3; %used for setting max time window. needs to be a RANGE that includes training and test indices.
 
 [t,u_total,y_total] = prepare_data(t_TAC_5122(total),t_BrAC_5122(total),data_TAC_5122(total),data_BrAC_5122(total),5,tau);
 
@@ -27,20 +28,17 @@ global training_u training_y test_y test_u m n
     training_u = [u_total(training,:),zeros(m,1)];
     test_y = [0,y_total(test,:)];
     test_u = [u_total(test,:),0];
-
-
-
-global Y
-
+    
     % training_y should be an ordinary array with one ROW per training episode, n columns
     assert(all(size(training_y)==[m n+1]));
     % training_u should be an ordinary array with one ROW per training episode, n columns
     assert(all(size(training_u)==[m n+1]));
     % test_y should be an ordinary 1xn array
     assert(all(size(test_y)==[1 n+1]));
-        
-    Y=[training_y;test_y];
 
+
+global Y        
+    Y=[training_y;test_y];
 
     
 global MSpl L R
@@ -49,18 +47,20 @@ global MSpl L R
     L = diag([1,zeros(1,N)]);
     R = diag([zeros(1,N),1]);
     
+SplineHandles = cell(1,M+1);
+for k=0:M
+    SplineHandles{k+1} = @(x) (x>(k-1)/M).*(x<=k/M).*(M*x-(k-1)) + (x>k/M).*(x<(k+1)/M).*(-M*x+k+1);
+end
+
+global SplinesP
+t=0:1/n:1;
+SplinesP = zeros(P+1,n+1);
+for k=0:P
+    fun = @(x)(x>(k-1)/P).*(x<=k/P).*(P*x-(k-1)) + (x>k/P).*(x<(k+1)/P).*(-P*x+k+1);
+    SplinesP(k+1,:) = fun(t);
+end
 
 global si_diag si_offdiag
-    % These are (M+1)xN (resp. (M+1)x(N+1)) matrices.
-    % SplineIntegrals0(k,j) gives int_{(j-1)/N} ^{j/N} psi^M_k(x) dx
-    % SplineIntegrals1(k,j) gives int_{(j-2)/N} ^{(j)/N} psi^M_k(x) dx
-    % with integral limits constrained to [0,1].
-
-    SplineHandles = cell(1,M+1);
-    for k=0:M
-        SplineHandles{k+1} = @(x) (x>(k-1)/M).*(x<=k/M).*(M*x-(k-1)) + (x>k/M).*(x<(k+1)/M).*(-M*x+k+1);
-    end
-
     % si short for "spline integrals"
     % each, when multiplied on the left by q1M, gives the diag, lower,
     % upper of Kq, respectively.
@@ -74,22 +74,25 @@ global si_diag si_offdiag
         si_diag(k,N+1)=integral(SplineHandles{k},(N-1)/N,1);
     end
     
+    
 global dAN_dqM
     dAN_dqM = zeros(N+1,N+1,M+2);
     % First page is q2, all zeros.
     for k=1:M+1
         dAN_dqM(:,:,k+1) = -MSpl\(N^2*(diag(-si_offdiag(k,:),-1)+diag(si_diag(k,:))+diag(-si_offdiag(k,:),1)));
     end
+    
         
 global CNhat
-    % outputs for single timestep
     CNhat = [1,zeros(1,N)];
 
     
-lambda = 0.07;
-lambda2 = 0.16;
+   
+% Regularization
+    
+lambda = 0.007;
+lambda2 = 0.001;
 
 global Reg dReg
     Reg = @(qM,u) lambda*sum(u.^2) + lambda2*sum(diff(u).^2);
-    dReg = @(qM,u) [zeros(1,M+2),2*(lambda*u + lambda2*[diff(u),-u(n)])];
-
+    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda2*[diff(u),-u(n)])];

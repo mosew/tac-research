@@ -1,15 +1,16 @@
 % Relies on globals file
 % Uses Neumann boundary conditions (different from the paper!!)
 
-function [JN,dJN] = JN_and_dJN(qu)
+function [JN,dJN] = JN_and_dJN_uspline(qu)
 
 % INPUT:
-% qM is an M+2 - vector which consists of q2 and the spline coefficients
-% u is an n - vector which consists of zero-order hold test input
+% qu(1) is q2, the gain coefficient
+% qu(2:M+2) is qM, the linear spline coefficients of the diffusivity parameter
+% qu(M+3:M+4+P) is u, the linear spline coefficients of the input
 
 % OUTPUT:
-% JN is (scalar) value of cost function JN evaluated at (qM,u) and
-% dJN, the gradient vector of JN, an M+2+n - vector
+% JN is (scalar) value of cost function JN evaluated at qu and
+% dJN, the gradient vector of JN, an M+2+P - vector
 
 %%%%%
 
@@ -18,19 +19,21 @@ function [JN,dJN] = JN_and_dJN(qu)
 % we could define them here but then they'll be created every
 % time J is called.
 
-global N M m n
+global N M P m n
 global Reg dReg
 global training_u test_y Y
-global CNhat
+global CNhat SplinesP
 
 % Process inputs
 q2 = qu(1);
 %q3 = qM_and_u(2);
 % qM is a vector of linear spline coefficients.
 qM = qu(2:M+2);
-u = qu((M+3):end);
-assert(length(u)==n);
-total_u = [training_u(:,1:n+1);[u,0]];
+c = qu((M+3):end);
+% c is a vector of spline coefficients
+assert(length(c)==P+1);
+test_u_sampled=sample_u_spline(c)';
+total_u = [training_u(:,1:n+1);test_u_sampled,0];
 
 
 Kq = build_Kq(qM);
@@ -40,6 +43,7 @@ BN = build_BN(q2);
 BNhat = build_BNhat(AN,ANhat,BN);
 dBNhat_dqM = build_dBNhat_dqM(AN,ANhat,dANhat_dqM,BN);
 Phi = build_Phi(ANhat,BNhat,total_u);
+
 
 
 
@@ -54,10 +58,10 @@ end
 
 
 % COMPUTE GRADIENT CONTRIBUTIONS
-dJN = zeros(1,M+2+n); % one for each component of (qM,u)
+dJN = zeros(1,M+2+P); % one for each component of (qM,u)
 JN=0;
 
-for j=n:-1:1
+for j=P:-1:1
     
     for i=1:m+1
         % Running everything backwards, we begin at timestep n+1.
@@ -68,10 +72,10 @@ for j=n:-1:1
         JN = JN + (CNhat*Phi(:,j+1,i)-Y(i,j+1))^2; %Note that this excludes j=1, i.e. t=0, because there is no output then.
     end
     eta(:,j,m+1)=ANhat' * eta(:,j+1,m+1) + 2*(CNhat*Phi(:,j,m+1)-test_y(j))*CNhat';
-    dJN(j+M+2) = dJN(j+M+2) + eta(:,j+1,m+1)'*BNhat;
+    dJN(j+M+2) = dJN(j+M+2) + eta(:,j+1,m+1)'*BNhat*SplinesP(:,j+1);
 end
 
-JN = JN + Reg(qM,u);
-dJN = dJN + dReg(qM,u);
+JN = JN + Reg(qM,test_u_sampled);
+dJN = dJN + dReg(qM,test_u_sampled);
 
 end

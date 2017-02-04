@@ -30,10 +30,10 @@ OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3
         
         
 % Collect optimal parameters and deconvolved signal
-global SplinesP
+global SplinesP_linear SplinesP_gaussian
 q2_star = parms_star(1)
 q1M_star = parms_star(2:M+2)
-u_star  = parms_star(M+3:end)*SplinesP;
+u_star  = parms_star(M+3:end)*SplinesP_gaussian;
 
 
 

@@ -1,0 +1,9 @@
+tests:
+
+test prepare_data.
+test episode i
+1) training: i.
+2) training: i:i+2 or so
+3) training: all
+4) training: 4 episodes besides i
+5) training: all episodes besides i

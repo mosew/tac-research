@@ -1,17 +1,17 @@
-clear
-load('5122.mat')
+
+load('ZD_Data_5122_minutes.mat')
 
 global tau M N P
-    tau=5; % timestep (in MINUTES)
+    tau=5;% timestep (in MINUTES)
     N=32; % state and evolution operator discretization index
     M=1; % Q discretization index
-    P=15; % U discretization index.  is the number of splines per hour.
+    P=25; % U discretization index.  is the number of splines per hour.
 
 % Set training and test sets
- global training test total
-% training = 1:11;
-% test = 1;
-% total=1:11; %used for setting max time window. needs to be a RANGE that includes training and test indices.
+% global training test total
+training = 5;
+test = 5;
+total=5; %used for setting max time window. needs to be a RANGE that includes training and test indices.
 
 [~,u_total,y_total] = prepare_data(t_TAC_5122(total),t_BrAC_5122(total),data_TAC_5122(total),data_BrAC_5122(total),5,tau);
 
@@ -52,12 +52,16 @@ for k=0:M
     SplineHandles{k+1} = @(x) (x>(k-1)/M).*(x<=k/M).*(M*x-(k-1)) + (x>k/M).*(x<(k+1)/M).*(-M*x+k+1);
 end
 
-global SplinesP
+global SplinesP_linear SplinesP_gaussian
 t=0:1/n:1;
-SplinesP = zeros(P+1,n+1);
+SplinesP_linear = zeros(P+1,n+1);
+SplinesP_gaussian = zeros(P+1,n+1);
+
 for k=0:P
-    fun = @(x)(x>(k-1)/P).*(x<=k/P).*(P*x-(k-1)) + (x>k/P).*(x<(k+1)/P).*(-P*x+k+1);
-    SplinesP(k+1,:) = fun(t);
+    linearfun = @(x)(x>(k-1)/P).*(x<=k/P).*(P*x-(k-1)) + (x>k/P).*(x<(k+1)/P).*(-P*x+k+1);
+    SplinesP_linear(k+1,:) = linearfun(t);
+    gaussianfun = @(x) exp(-(x-k/P).^2/(2*sqrt(P)));
+    SplinesP_gaussian(k+1,:) = gaussianfun(t);
 end
 
 global si_diag si_offdiag

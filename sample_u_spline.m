@@ -1,4 +1,3 @@
-function u_sampled = sample_u_spline(c)
-    global SplinesP
+function u_sampled = sample_u_spline(c,SplinesP)
     u_sampled = c*SplinesP;
 end

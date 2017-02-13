@@ -1,9 +1,52 @@
 tests:
 
 test prepare_data.
+maybe figure out better windowing
+Figure out and fix TAC de-noising schema.
+pad episodes at beginning?
+
+
 test episode i
-1) training: i.
-2) training: i:i+2 or so
-3) training: all
-4) training: 4 episodes besides i
-5) training: all episodes besides i
+1) training: i only
+2) training: all
+3) training: all except i
+
+33 total.
+
+one table for each tau and spline type
+
+Each of 1),2),3)
+
+	Varying M,P,tau. Maybe not N or tau?
+		M ranging 2^(0:5)
+		P ranging 2^(2:6)
+		tau = 1,5
+		Gaussian splines as well as linear?
+	Testing all combinations: 6*5 * 2*2? = 120 (N fixed).
+	
+	Table for fixed tau, spline type:
+		M by P, each cell has data below.
+	
+	Data to collect for each
+		L2 MSE: training error and test error (MSE and sd across all possible training/test episodes)		
+		Linf error: training error and test error (mean and sd across all possible training/test episodes) 
+		error in AUC: training error and test error (mean and sd across all possible training/test episodes) 
+
+		peak time error: training and test, each episode. also mean and sd.
+		peak height error: training and test, each episode. also mean and sd.
+
+		all errors over time
+		
+		parameters q (for each)
+		
+		
+		
+Findings: Peak height and peak time estimates don't really depend on M.
+Linf error depends marginally on M, but less and less so as training corpus grows, as expected.
+	To show, give log10(sd/mean), relevant for MSE since it is positive.
+	this will give difference in magnitude b/w sd and mean
+	Give variance of errors over M=0,2^(0:5) as well as episodes 1:11.
+	
+Also plot errors
+	
+~15-minute grid seems to work best for these error measures

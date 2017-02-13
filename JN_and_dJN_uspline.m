@@ -20,7 +20,6 @@ function [JN,dJN] = JN_and_dJN_uspline(qu)
 % time J is called.
 
 global N M P m n
-global Reg dReg
 global training_u test_y Y
 global CNhat SplinesP_linear SplinesP_gaussian
 
@@ -32,7 +31,7 @@ qM = qu(2:M+2);
 c = qu((M+3):end);
 % c is a vector of spline coefficients
 assert(length(c)==P+1);
-test_u_sampled=sample_u_spline(c,SplinesP_gaussian);
+test_u_sampled=sample_u_spline(c,SplinesP_linear);
 total_u = [training_u;test_u_sampled];
 
 
@@ -73,11 +72,8 @@ for j=n:-1:1
     end
     eta(:,j,m+1)=ANhat' * eta(:,j+1,m+1) + 2*(CNhat*Phi(:,j,m+1)-test_y(j))*CNhat';
     for r=0:P
-        dJN(r+M+3) = dJN(r+M+3) + eta(:,j+1,m+1)'*BNhat*SplinesP_gaussian(r+1,j+1);
+        dJN(r+M+3) = dJN(r+M+3) + eta(:,j+1,m+1)'*BNhat*SplinesP_linear(r+1,j+1);
     end
 end
-
-%JN = JN + Reg(qM,test_u_sampled);
-%dJN = dJN + dReg(qM,test_u_sampled);
 
 end

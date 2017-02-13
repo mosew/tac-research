@@ -1,7 +1,18 @@
 % main routine
 
 JN_and_dJN_globals
+global SplinesP_linear SplinesP_gaussian
+global M P
 
+if M==0
+    M=1;
+    JN_and_dJN_globals
+    Aeq = [0,1,-1,zeros(1,P+1)];
+    Beq = 0;
+else
+    Aeq=[];
+    Beq=[];
+end
 
 % Test parameters
 qtest = ones(1,M+2);
@@ -14,53 +25,56 @@ parms_init = [qtest,ctest];
 % Options for constrained minimization
 Aineq = [];
 Bineq = [];
-LB = [eps*ones(size(qtest)),zeros(size(ctest))];
+LB = [10^(-8)*ones(size(qtest)),zeros(size(ctest))];
 UB = [inf*ones(size(qtest)),inf*ones(size(ctest))];
 NONLCON = [];
-Aeq = [];
-Beq = [];
 OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3000,'TolFun',10^-9,...
             'TolX',10^-9);
 
-
+        
+        
+badscale=0;
+lastwarn('')
 % Constrained minimization        
 [parms_star,FVAL,EXITFLAG,OUTPUT] = fmincon('JN_and_dJN_uspline',parms_init,Aineq,Bineq,Aeq,Beq,LB,UB,...
             NONLCON,OPTIONS);
-
+if lastwarn
+    badscale=1;
+    lastwarn('')
+end
         
         
 % Collect optimal parameters and deconvolved signal
-global SplinesP_linear SplinesP_gaussian
-q2_star = parms_star(1)
-q1M_star = parms_star(2:M+2)
-u_star  = parms_star(M+3:end)*SplinesP_gaussian;
+q2_star = parms_star(1);
+q1M_star = parms_star(2:M+2);
+u_star  = parms_star(M+3:end)*SplinesP_linear;
 
 
 
 
-% Plot performance
-%figure
-hold on
-plot(u_star)
-
-
-% % Post-processing: Moving Average
-% b=14;
-% u_star_ma = u_star;
-% u_s = [zeros(1,b/2),u_star,zeros(1,b/2)];
-% for i = b/2+1 : length(u_s)-b
-%     u_star_ma(i-b/2) = mean(u_s(i-b/2:i+b/2));
-% end
-% plot(u_star_ma)
-
-
-% % Post-processing: Savitsky-Golay
-% u_star_sg = max(sgolayfilt(u_star',2,13),0);
-% plot(u_star_sg)
-
-xlim([0,length(test_u)])
-plot(test_u)
-%plot(test_y)
+% % Plot performance
+% h2=figure
+% hold on
+% plot(u_star)
+% 
+% 
+% % % Post-processing: Moving Average
+% % b=8;
+% % u_star_ma = u_star;
+% % u_s = [zeros(1,b/2),u_star,zeros(1,b/2)];
+% % for i = b/2+1 : length(u_s)-b
+% %     u_star_ma(i-b/2) = mean(u_s(i-b/2:i+b/2));
+% % end
+% % plot(u_star_ma)
+% 
+% 
+% % % Post-processing: Savitsky-Golay
+% % u_star_sg = max(sgolayfilt(u_star',2,13),0);
+% % plot(u_star_sg)
+% 
+% xlim([0,length(test_u)])
+% plot(test_u)
+% %plot(test_y)
 
 
 % Feed optimal parameters and input forward through system to check it

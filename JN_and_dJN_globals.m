@@ -1,22 +1,19 @@
 
-load('ZD_Data_5122_minutes.mat')
+
+
+
 
 global tau M N P
-    tau=5;% timestep (in MINUTES)
+%    tau=5;% timestep (in MINUTES)
     N=32; % state and evolution operator discretization index
-    M=1; % Q discretization index
-    P=25; % U discretization index.  is the number of splines per hour.
+%     M=1; % Q discretization index
+%     P=64; % U discretization index. number of splines per episode.
+
 
 % Set training and test sets
-% global training test total
-training = 5;
-test = 5;
-total=5; %used for setting max time window. needs to be a RANGE that includes training and test indices.
-
-[~,u_total,y_total] = prepare_data(t_TAC_5122(total),t_BrAC_5122(total),data_TAC_5122(total),data_BrAC_5122(total),5,tau);
-
-training = training-total(1)+1;
-test = test-total(1)+1;
+global training test
+% training = 1;
+% test = 2;
 
 y_total = max(y_total,0);
 
@@ -35,6 +32,11 @@ global training_u training_y test_y test_u m n
     assert(all(size(training_u)==[m n+1]));
     % test_y should be an ordinary 1xn array
     assert(all(size(test_y)==[1 n+1]));
+    
+    
+    
+    
+
 
 
 global Y        
@@ -60,7 +62,7 @@ SplinesP_gaussian = zeros(P+1,n+1);
 for k=0:P
     linearfun = @(x)(x>(k-1)/P).*(x<=k/P).*(P*x-(k-1)) + (x>k/P).*(x<(k+1)/P).*(-P*x+k+1);
     SplinesP_linear(k+1,:) = linearfun(t);
-    gaussianfun = @(x) exp(-(x-k/P).^2/(2*sqrt(P)));
+    gaussianfun = @(x) exp(-(x-k/P).^2/(1/n));
     SplinesP_gaussian(k+1,:) = gaussianfun(t);
 end
 

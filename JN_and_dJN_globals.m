@@ -54,16 +54,17 @@ for k=0:M
     SplineHandles{k+1} = @(x) (x>(k-1)/M).*(x<=k/M).*(M*x-(k-1)) + (x>k/M).*(x<(k+1)/M).*(-M*x+k+1);
 end
 
-global SplinesP_linear SplinesP_gaussian
+global SplinesP_linear
 t=0:1/n:1;
 SplinesP_linear = zeros(P+1,n+1);
-SplinesP_gaussian = zeros(P+1,n+1);
+% global SplinesP_gaussian
+% SplinesP_gaussian = zeros(P+1,n+1);
 
 for k=0:P
     linearfun = @(x)(x>(k-1)/P).*(x<=k/P).*(P*x-(k-1)) + (x>k/P).*(x<(k+1)/P).*(-P*x+k+1);
     SplinesP_linear(k+1,:) = linearfun(t);
-    gaussianfun = @(x) exp(-(x-k/P).^2/(1/n));
-    SplinesP_gaussian(k+1,:) = gaussianfun(t);
+%     gaussianfun = @(x) exp(-(x-k/P).^2/(1/n));
+%     SplinesP_gaussian(k+1,:) = gaussianfun(t);
 end
 
 global si_diag si_offdiag

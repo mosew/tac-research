@@ -1,9 +1,11 @@
 % main routine
 
 JN_and_dJN_globals
-global SplinesP_linear SplinesP_gaussian
+global SplinesP_linear
 global M P
 
+
+% Do we want a constant diffusivity parameter?
 if M==0
     M=1;
     JN_and_dJN_globals
@@ -28,8 +30,8 @@ Bineq = [];
 LB = [10^(-8)*ones(size(qtest)),zeros(size(ctest))];
 UB = [inf*ones(size(qtest)),inf*ones(size(ctest))];
 NONLCON = [];
-OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3000,'TolFun',10^-9,...
-            'TolX',10^-9);
+OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3000,'TolFun',10^-7,...
+            'TolX',10^-7);
 
         
         

@@ -44,8 +44,6 @@ for k = 1:3
     end
 end
 
-q = t;
-
 % These are the runs where a "Nearly Singular Matrix" error was thrown
 badscales_actual_mp = badscales;
 badscales_actual_mp(:,1) = 2.^(badscales(:,1)-1);

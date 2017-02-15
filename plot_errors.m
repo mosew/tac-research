@@ -4,7 +4,7 @@ for i = 1:11
     subplot(2,6,i)
     hold on
     for p = 1:5
-        % Take M=1, all training episodes used
+        % Take M=1, paradigm 2
         a=cell2mat(actual_errors(2,p,2,i));
         plot(a);
     end

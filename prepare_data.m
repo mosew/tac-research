@@ -20,6 +20,9 @@ function [time_out,u_total,y_total] = prepare_data(t_TAC,t_BrAC,data_TAC,data_Br
 % u_total   : ""                data                BrAC    ""   , fit to spline and sampled uniformly with timestep tau
 % y_total   : ""                                     TAC    ""
 
+
+
+
 % Total number of episodes
 m_total = length(t_TAC);
 
@@ -42,23 +45,22 @@ n_out = floor(max_n_in * tau_in / tau_out);
 
 time_out = (0:(n_out-1))*tau_out;
 
+
 u_total=zeros(m_total,n_out);
 y_total=zeros(m_total,n_out);
 
 % Generate, evaluate, restrict>=0 splines.
- for i = 1:m_total
+for i = 1:m_total
     y_total(i,:)=max(interp1(t_TAC{i},data_TAC{i},time_out,'spline','extrap'),0);
-    u_total(i,:)=max(interp1(t_BrAC{i},data_BrAC{i},time_out,'spline','extrap'),0);
-    
+    u_total(i,:)=max(interp1(t_BrAC{i},data_BrAC{i},time_out,'linear','extrap'),0);
     %u_total(i,:) = max( ppval(spline(t_BrAC{i},data_BrAC{i}),time_out), 0);
     %y_total(i,:) = max( ppval(spline(t_TAC{i},data_TAC{i}),time_out), 0);
  end
-
-
  
 % % De-noise TAC spline
 % 
- %y_total = max(sgolayfilt(y_total',2,41),0)';
+
+y_total = max(sgolayfilt(y_total',2,41),0)';
 
 % y_total_ma = y_total;
 % b=2;

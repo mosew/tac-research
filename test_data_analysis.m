@@ -1,29 +1,29 @@
-load('test_data.mat')
-load('test_data_constantm.mat')
-t=test_data;
+load('test_data_tau5.mat')
+t=test_data_tau5;
+% m, p, paradigm, episode
 t=permute(t,[2,3,1,4]);
-t0=test_data_constantm;
-t0=permute(t0,[2,3,1,4]);
+% t0=test_data_constantm;
+% t0=permute(t0,[2,3,1,4]);
 
 badscales=[];
-L2_errors = zeros(7,5,3,11);
-Linf_errors = zeros(7,5,3,11);
-AUC_errors = zeros(7,5,3,11);
-peak_time_errors = zeros(7,5,3,11);
-peak_height_errors = zeros(7,5,3,11);
-actual_errors = cell(7,5,3,11);
-full_deconvolved_BrACs = cell(7,5,3,11);
-trained_parameters = cell(7,5,3,11);
+L2_errors = zeros(5,5,3,11);
+Linf_errors = zeros(5,5,3,11);
+AUC_errors = zeros(5,5,3,11);
+peak_time_errors = zeros(5,5,3,11);
+peak_height_errors = zeros(5,5,3,11);
+actual_errors = cell(5,5,3,11);
+full_deconvolved_BrACs = cell(5,5,3,11);
+trained_parameters = cell(5,5,3,11);
 
 for k = 1:3
     for i = 1:11
-        for m = 1:7
+        for m = 1:5
             for p = 1:5
-                if m==1
-                    s = t0(m,p,k,i);
-                else
-                    s=t(m-1,p,k,i);
-                end
+%                 if m==1
+%                     s = t0(m,p,k,i);
+%                 else
+                    s=t(m,p,k,i);
+%                 end
                 s=s{1};
                 if s.badscale==1
                     badscales=[badscales;[m,p,k,i]];

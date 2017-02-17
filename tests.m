@@ -27,10 +27,12 @@ for i = 1:11
         if p == 3
             training = [1:(i-1),(i+1):11];
         end
+        
+        test = i;
+
         for Mind = (0:4)
             for Pind = (2:6)
                 tic
-                test = i;
                 M = 2^Mind;
                 P = 2^Pind;
                 if M==1

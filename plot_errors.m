@@ -1,15 +1,15 @@
 % plot errors
 figure
-for i = 1:11
-    subplot(2,6,i)
+for i = 1:3
+    subplot(1,3,i)
     hold on
-    for p = 1:5
+    %for p = 1:5
         % Take M=1, paradigm 3
-        a=cell2mat(full_deconvolved_BrACs(2,p,3,i));
+        a=cell2mat(full_deconvolved_BrACs(2,3,3,i));
         plot(a);
-    end
+    %end
     
-    plot(data_TAC_5122{i})
+    plot(u_total(i,:),'.')
     
     if i==11
         h=legend('P=4','P=8','P=16','P=32','P=64');

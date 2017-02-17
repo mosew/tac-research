@@ -20,8 +20,8 @@ function [JN,dJN] = JN_and_dJN_uspline(qu)
 % time J is called.
 
 global N M P m n
-global training_u test_y Y Reg dReg
-global CNhat SplinesP_linear SplinesP_gaussian
+global training_u Y Reg dReg
+global CNhat SplinesP_linear
 
 % Process inputs
 q2 = qu(1);
@@ -70,7 +70,7 @@ for j=n:-1:1
         end
         JN = JN + (CNhat*Phi(:,j+1,i)-Y(i,j+1))^2; %Note that this excludes j=1, i.e. t=0, because there is no output then.
     end
-    %eta(:,j,m+1)=ANhat' * eta(:,j+1,m+1) + 2*(CNhat*Phi(:,j,m+1)-test_y(j))*CNhat';
+    
     for r=0:P
         dJN(r+M+3) = dJN(r+M+3) + eta(:,j+1,m+1)'*BNhat*SplinesP_linear(r+1,j+1);
     end

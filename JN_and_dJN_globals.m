@@ -4,16 +4,16 @@
 
 
 global tau M N P
-%    tau=5;% timestep (in MINUTES)
     N=32; % state and evolution operator discretization index
+%     tau=5;% timestep (in MINUTES)
 %     M=1; % Q discretization index
-%     P=64; % U discretization index. number of splines per episode.
+%     P=16; % U discretization index. number of splines per episode.
 
 
 % Set training and test sets
 global training test
-% training = 1;
-% test = 2;
+%  training = 4:8;
+%  test = 5;
 
 y_total = max(y_total,0);
 

@@ -4,17 +4,17 @@ global training test tau u_total
 global M P
 tau = 5;
 
-%% Call reprocess_data to define u_total and stuff
+%% Call reprocess_data to define u_total, maybe other stuff?
 reprocess_data
 
 %% Define cell array to hold test data
-% (M,) P, (test paradigm,) test episode
-REGTEST_test_data_tau5_noeps39_lambda_reg01_dreg1 = cell(5,1,9);
+% M, P, test paradigm, test episode
+%test_data_tau5_noeps39_new = cell(3,5,5,9);
 
 %% Run tests
 
-% M=1 did best, i.e. diffusion coefficient linearly dependent on depth.
-M=1;
+% % M=1 did best, i.e. diffusion coefficient linearly dependent on depth.
+% M=1;
 
 % For episodes 1 through 9 (excluded original episodes 3 and 9)
 for i = 1:9
@@ -25,7 +25,7 @@ for i = 1:9
     % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
     % paradigm 4: training on all episodes
     % paradigm 5: training on all except test episode
-    for para = 5:5
+    for para = 1:5
         if para == 1
             training = i;
         end
@@ -54,14 +54,13 @@ for i = 1:9
         test = i;
 
         % For various values of M
-        %for Mind = (0:4)
-%            if M==1
-%                 M=0;
-%             else
-%                 M=M/2;
-%             end
-%                 
-%             M = 2^Mind;
+        for Mind = (3:4)
+            M = 2^Mind;
+            if M==1
+                M=0;
+            else
+                M=M/2;
+            end
 
             % For various values of P
             for Pind = (2:6)
@@ -71,7 +70,7 @@ for i = 1:9
                 % Run the minimization script and time it
                 tic
                 minimize_uspline
-                [P,para,i]
+                [Mind,P,para,i]
                 toc
                 
                 % Collect data from the run
@@ -83,7 +82,7 @@ for i = 1:9
                 [peak_act, peaktime_act] = max(test_u_end);
                 
                 % Define struct of collected data
-                REGTEST_test_data_tau5_noeps39_lambda_reg01_dreg1{Pind-1,1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
+                test_data_tau5_noeps39_new{Mind+1,Pind-1,para,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
                                              'full_deconvolved_BrAC',{u_star_orig},...
                                              'actual_error',{u_star_end-test_u_end},...
                                              'L2_error',{sum((u_star_end-test_u_end).^2)},...
@@ -95,6 +94,6 @@ for i = 1:9
                                          
 
             end    
-        %end
+        end
     end
 end

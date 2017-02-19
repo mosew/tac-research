@@ -95,9 +95,9 @@ global CNhat
    
 % Regularization
     
-lambda = 0.01;
-lambda2 = 0.1;
+lambda = 0;
+lambda2 = 0;
 
 global Reg dReg
     Reg = @(qM,u) lambda*sum(u.^2) + lambda2*sum(diff(u).^2);
-    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda2*[diff(u),-u(end)])];
+    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda2*[diff(diff(u)),-u(end-1),-u(end)])];

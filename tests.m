@@ -9,7 +9,7 @@ reprocess_data
 
 %% Define cell array to hold test data
 % (M,) P, (test paradigm,) test episode
-REGTEST_test_data_tau5_noeps39_lambda01 = cell(5,1,9);
+REGTEST_test_data_tau5_noeps39_lambda_reg01_dreg1 = cell(5,1,9);
 
 %% Run tests
 
@@ -83,7 +83,7 @@ for i = 1:9
                 [peak_act, peaktime_act] = max(test_u_end);
                 
                 % Define struct of collected data
-                REGTEST_test_data_tau5_noeps39_lambda01{Pind-1,1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
+                REGTEST_test_data_tau5_noeps39_lambda_reg01_dreg1{Pind-1,1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
                                              'full_deconvolved_BrAC',{u_star_orig},...
                                              'actual_error',{u_star_end-test_u_end},...
                                              'L2_error',{sum((u_star_end-test_u_end).^2)},...

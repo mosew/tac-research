@@ -12,7 +12,7 @@ for i = 1:9
     hold on
     %for p = 1:5
         % paradigm 5
-        a=cell2mat(full_deconvolved_BrACs(1:end,1,i))';
+        a=cell2mat(full_deconvolved_BrACs(3:end,1,i))';
         plot(a);
     %end
     
@@ -20,7 +20,7 @@ for i = 1:9
     xlim([0 100])
     
     if i==9
-        h=legend('P=4','P=8','P=16','P=32','P=64');
+        h=legend('P=16','P=32','P=64');
         pos=get(h,'position');
         set(h,'position',[0.8,0.2,pos(3:4)])
     end

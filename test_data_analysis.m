@@ -1,5 +1,5 @@
-load('REGTEST_tau5_noeps39_lambda001.mat')
-t=REGTEST_test_data_tau5_noeps39_lambda001;
+load('REGTEST_test_data_tau5_noeps39_lambda_reg01_dreg1.mat')
+t=REGTEST_test_data_tau5_noeps39_lambda_reg01_dreg1;
 % m, p, paradigm, episode
 %t=permute(t,[2,1,3]);
 % t0=test_data_constantm;

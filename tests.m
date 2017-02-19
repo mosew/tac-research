@@ -1,53 +1,89 @@
-% tests
+%% Run model for various values of M, P, testing paradigms, episodes
 
-global training test total tau test_u
-total = 1:11;
+global training test tau u_total
 global M P
 tau = 5;
+
+%% Call reprocess_data to define u_total and stuff
 reprocess_data
-assert(tau==5);
 
-% test paradigm, M, P, test episode
-% paradigm 1: training and testing on same episode
-% paradigm 2: training on all episodes
-% paradigm 3: training on all except test episode
-% test_data_tau5 = cell(3,5,5,11);
+%% Define cell array to hold test data
+% (M,) P, (test paradigm,) test episode
+REGTEST_test_data_tau5_noeps39_lambda01 = cell(5,1,9);
 
+%% Run tests
 
-for i = 1:11
+% M=1 did best, i.e. diffusion coefficient linearly dependent on depth.
+M=1;
+
+% For episodes 1 through 9 (excluded original episodes 3 and 9)
+for i = 1:9
     
-    for p = 1:3
-
-        if p == 1
+    % For testing paradigms 1 through 5
+    % paradigm 1: training and testing on same episode
+    % paradigm 2: testing on i, training on i : i+3 (wraparound)
+    % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
+    % paradigm 4: training on all episodes
+    % paradigm 5: training on all except test episode
+    for para = 5:5
+        if para == 1
             training = i;
         end
-        if p==2
-            training = 1:11;
+        if para==2
+            if i<=6
+                training = i:i+3;
+            else
+                training = [i:min(i+3,9),1:(i+3-9)];
+            end
         end
-        if p == 3
-            training = [1:(i-1),(i+1):11];
+        if para==3
+            if i<=5
+                training = (i+1):i+4;
+            else
+                training = [(i+1):min(i+4,9),1:(i+4-9)];
+            end
+        end
+        if para==4
+            training = 1:9;
+        end
+        if para == 5
+            training = [1:(i-1),(i+1):9];
         end
         
+        % Test episode i
         test = i;
 
-        for Mind = (0:4)
+        % For various values of M
+        %for Mind = (0:4)
+%            if M==1
+%                 M=0;
+%             else
+%                 M=M/2;
+%             end
+%                 
+%             M = 2^Mind;
+
+            % For various values of P
             for Pind = (2:6)
-                tic
-                M = 2^Mind;
                 P = 2^Pind;
-                if M==1
-                    M=0;
-                else
-                    M=M/2;
-                end
+                
+                
+                % Run the minimization script and time it
+                tic
                 minimize_uspline
+                [P,para,i]
+                toc
+                
+                % Collect data from the run
                 u_star_orig = u_star;
-                test_u_orig = test_u;
+                test_u_orig = u_total(i,:);
                 u_star_end = u_star(1:durations(i));
-                test_u_end = test_u(1:durations(i));
+                test_u_end = u_total(i,1:durations(i));
                 [peak_est, peaktime_est] = max(u_star_end);
                 [peak_act, peaktime_act] = max(test_u_end);
-                test_data_tau5{p,Mind+1,Pind-1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
+                
+                % Define struct of collected data
+                REGTEST_test_data_tau5_noeps39_lambda01{Pind-1,1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
                                              'full_deconvolved_BrAC',{u_star_orig},...
                                              'actual_error',{u_star_end-test_u_end},...
                                              'L2_error',{sum((u_star_end-test_u_end).^2)},...
@@ -56,9 +92,9 @@ for i = 1:11
                                              'peak_time_error',{tau*(peaktime_est-peaktime_act)},...
                                              'peak_height_error',{peak_est-peak_act},...
                                              'badscale',{badscale});
-                [p,Mind,P,i]
-                toc
+                                         
+
             end    
-        end
+        %end
     end
 end

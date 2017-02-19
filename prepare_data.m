@@ -60,7 +60,7 @@ for i = 1:m_total
 % % De-noise TAC spline
 % 
 
-y_total = max(sgolayfilt(y_total',2,41),0)';
+y_total = max(sgolayfilt(y_total',2,7),0)';
 
 % y_total_ma = y_total;
 % b=2;

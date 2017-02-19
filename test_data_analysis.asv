@@ -1,4 +1,4 @@
-load('REGTEST_tau5_noeps39_lambda001.mat')
+load('REGTtest_data_tau5_noeps39_lambda001.mat')
 t=REGTEST_test_data_tau5_noeps39_lambda001;
 % m, p, paradigm, episode
 %t=permute(t,[2,1,3]);
@@ -25,9 +25,6 @@ for para = 1:1
                     s=t(p,para,i);
 %                 end
                 s=s{1};
-                
-                
-                
                 if s.badscale==1
                     badscales=[badscales;[p,para,i]];
                 end

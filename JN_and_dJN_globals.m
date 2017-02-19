@@ -1,8 +1,6 @@
 
 
 
-
-
 global tau M N P
     N=32; % state and evolution operator discretization index
 %     tau=5;% timestep (in MINUTES)
@@ -12,7 +10,7 @@ global tau M N P
 
 % Set training and test sets
 global training test
-%  training = 4:8;
+%  training = 1:9;
 %  test = 5;
 
 y_total = max(y_total,0);
@@ -97,8 +95,8 @@ global CNhat
    
 % Regularization
     
-lambda = 0;
-lambda2 = 0;
+lambda = 0.01;
+lambda2 = 0.01;
 
 global Reg dReg
     Reg = @(qM,u) lambda*sum(u.^2) + lambda2*sum(diff(u).^2);

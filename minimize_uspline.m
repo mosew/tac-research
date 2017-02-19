@@ -3,7 +3,6 @@
 JN_and_dJN_globals
 global SplinesP_linear
 global M P
-global test
 
 
 % Do we want a constant diffusivity parameter?
@@ -28,7 +27,7 @@ parms_init = [qtest,ctest];
 % Options for constrained minimization
 Aineq = [];
 Bineq = [];
-LB = [10^(-8)*ones(size(qtest)),zeros(size(ctest))];
+LB = [eps*ones(size(qtest)),zeros(size(ctest))];
 UB = [inf*ones(size(qtest)),inf*ones(size(ctest))];
 NONLCON = [];
 OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3000,'TolFun',10^-7,...
@@ -55,11 +54,11 @@ u_star  = parms_star(M+3:end)*SplinesP_linear;
 
 
 
-% Plot performance
-h2=figure
-hold on
-plot(u_star)
-plot(u_total(test,:))
+% % Plot performance
+% figure
+% hold on
+% plot(u_star)
+% plot(u_total(test,:))
 % 
 % 
 % % % Post-processing: Moving Average
@@ -81,13 +80,13 @@ plot(u_total(test,:))
 % %plot(test_y)
 
 
-% Feed optimal parameters and input forward through system to check it
-figure
-Phi = forward_system(q2_star,q1M_star,u_star);
-y_out = zeros(1,n);
-for j=1:n
-    y_out(j) = CNhat * Phi(:,j,1);
-end
-plot(y_out)
-hold on
-plot(test_y)
+% % Feed optimal parameters and input forward through system to check it
+% figure
+% Phi = forward_system(q2_star,q1M_star,u_star);
+% y_out = zeros(1,n);
+% for j=1:n
+%     y_out(j) = CNhat * Phi(:,j,1);
+% end
+% plot(y_out)
+% hold on
+% plot(test_y)

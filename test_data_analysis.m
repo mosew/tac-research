@@ -1,20 +1,20 @@
-load('test_data_tau5_noeps39.mat')
-t=test_data_tau5_noeps39;
+%load('test_data_tau5_noeps39_lambda0001.mat')
+t=test_data_tau5_noeps39_lambda0001;
 % m, p, paradigm, episode
 
 badscales=[];
-L2_errors = zeros(3,5,5,9);
-Linf_errors = zeros(3,5,5,9);
-AUC_errors = zeros(3,5,5,9);
-peak_time_errors = zeros(3,5,5,9);
-peak_height_errors = zeros(3,5,5,9);
-actual_errors = cell(3,5,5,9);
-full_deconvolved_BrACs = cell(3,5,5,9);
-trained_parameters = cell(3,5,5,9);
+L2_errors = zeros(5,9);
+Linf_errors = zeros(5,9);
+AUC_errors = zeros(5,9);
+peak_time_errors = zeros(5,9);
+peak_height_errors = zeros(5,9);
+actual_errors = cell(5,9);
+full_deconvolved_BrACs = cell(5,9);
+trained_parameters = cell(5,9);
 
-for para = 1:5
+for para = 1:1
     for i = 1:9
-        for m = 1:3
+        for m = 1:1
             for p = 1:5
 %                 if m==1
 %                     s = t0(p,k,i);
@@ -23,9 +23,9 @@ for para = 1:5
 %                 end
                 s=s{1};
                 
-                if s.badscale==1
-                    badscales=[badscales;[m,p,para,i]];
-                end
+%                 if s.badscale==1
+%                     badscales=[badscales;[m,p,para,i]];
+%                 end
                 L2_errors(m,p,para,i) = s.L2_error;
                 Linf_errors(m,p,para,i) = s.Linf_error;
                 AUC_errors(m,p,para,i) = s.AUC_error;

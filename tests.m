@@ -8,8 +8,10 @@ tau = 5;
 reprocess_data
 
 %% Define cell array to hold test data
+
 % M, P, test paradigm, test episode
-%test_data_tau5_noeps39_new = cell(3,5,5,9);
+
+test_data_tau5_noeps39_lambda0001 = cell(5,5,5,9);
 
 %% Run tests
 
@@ -25,7 +27,7 @@ for i = 1:9
     % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
     % paradigm 4: training on all episodes
     % paradigm 5: training on all except test episode
-    for para = 1:5
+    for para = 5
         if para == 1
             training = i;
         end
@@ -54,7 +56,7 @@ for i = 1:9
         test = i;
 
         % For various values of M
-        for Mind = (3:4)
+        for Mind = 2
             M = 2^Mind;
             if M==1
                 M=0;
@@ -76,13 +78,13 @@ for i = 1:9
                 % Collect data from the run
                 u_star_orig = u_star;
                 test_u_orig = u_total(i,:);
-                u_star_end = u_star(1:durations(i));
-                test_u_end = u_total(i,1:durations(i));
+                u_star_end = u_star;
+                test_u_end = u_total(i,:);
                 [peak_est, peaktime_est] = max(u_star_end);
                 [peak_act, peaktime_act] = max(test_u_end);
                 
                 % Define struct of collected data
-                test_data_tau5_noeps39_new{Mind+1,Pind-1,para,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
+                test_data_tau5_noeps39_lambda0001{Pind-1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
                                              'full_deconvolved_BrAC',{u_star_orig},...
                                              'actual_error',{u_star_end-test_u_end},...
                                              'L2_error',{sum((u_star_end-test_u_end).^2)},...

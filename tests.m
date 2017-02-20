@@ -11,7 +11,7 @@ reprocess_data
 
 % M, P, test paradigm, test episode
 
-test_data_tau5_noeps39_lambda0001 = cell(5,5,5,9);
+test_data_tau5_noeps39_lambda0pt15 = cell(5,9);
 
 %% Run tests
 
@@ -77,14 +77,14 @@ for i = 1:9
                 
                 % Collect data from the run
                 u_star_orig = u_star;
-                test_u_orig = u_total(i,:);
+                test_u_orig = [u_total(i,:),0];
                 u_star_end = u_star;
-                test_u_end = u_total(i,:);
+                test_u_end = test_u_orig;
                 [peak_est, peaktime_est] = max(u_star_end);
                 [peak_act, peaktime_act] = max(test_u_end);
                 
                 % Define struct of collected data
-                test_data_tau5_noeps39_lambda0001{Pind-1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
+                test_data_tau5_noeps39_lambda0pt15{Pind-1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
                                              'full_deconvolved_BrAC',{u_star_orig},...
                                              'actual_error',{u_star_end-test_u_end},...
                                              'L2_error',{sum((u_star_end-test_u_end).^2)},...

@@ -8,16 +8,16 @@ set(h2,'DefaultTextInterpreter', 'latex')
 
 for i = 1:9
     subplot(2,5,i)
-    a=cell2mat(full_deconvolved_BrACs(2:5,i))';
+    a=cell2mat(full_deconvolved_BrACs(3:5,i))';
     plot(a);
     hold on
     plot(u_total(i,:),'.')
     xlim([0,100])
     
     if i==9
-        h=legend('P=8','P=16','P=32','P=64','interpolated BrAC');
+        h=legend('P=16','P=32','P=64','interpolated BrAC');
         pos=get(h,'position');
-        set(h,'position',[0.7,0.2,pos(3:4)])
+        set(h,'position',[0.8,0.2,pos(3:4)])
     end
 
 end

@@ -1,4 +1,4 @@
-%load('test_data_tau5_noeps39_lambda0001.mat')
+load('REGTEST_tau5_noeps39_lambda0001.mat')
 t=test_data_tau5_noeps39_lambda0001;
 % m, p, paradigm, episode
 
@@ -19,23 +19,23 @@ for para = 1:1
 %                 if m==1
 %                     s = t0(p,k,i);
 %                 else
-                    s=t(m,p,para,i);
+                    s=t(p,i);
 %                 end
                 s=s{1};
                 
 %                 if s.badscale==1
-%                     badscales=[badscales;[m,p,para,i]];
+%                     badscales=[badscales;[p,i]];
 %                 end
-                L2_errors(m,p,para,i) = s.L2_error;
-                Linf_errors(m,p,para,i) = s.Linf_error;
-                AUC_errors(m,p,para,i) = s.AUC_error;
-                peak_time_errors(m,p,para,i) = s.peak_time_error;
-                peak_height_errors(m,p,para,i) = s.peak_height_error;
-                actual_errors{m,p,para,i} = s.actual_error;
-                full_deconvolved_BrACs{m,p,para,i} = s.full_deconvolved_BrAC;
-                trained_parameters{m,p,para,i} = s.trained_parameters;
+                L2_errors(p,i) = s.L2_error;
+                Linf_errors(p,i) = s.Linf_error;
+                AUC_errors(p,i) = s.AUC_error;
+                peak_time_errors(p,i) = s.peak_time_error;
+                peak_height_errors(p,i) = s.peak_height_error;
+                actual_errors{p,i} = s.actual_error;
+                full_deconvolved_BrACs{p,i} = s.full_deconvolved_BrAC;
+                trained_parameters{p,i} = s.trained_parameters;
 %                 if m==1
-%                     trained_parameters{m,p,para,i} = trained_parameters{m,p,para,i}(1:2);
+%                     trained_parameters{p,i} = trained_parameters{p,i}(1:2);
 %                 end
             end
         end

@@ -11,12 +11,12 @@ lambdas = [0,0.001,0.01,0.1,0.2,0.4,0.8];
 
 for l = 1:length(lambdas)
 
-    lambda = lambdas(l);
-    lambda2= lambdas(l);
-    ['Testing on lambda=' num2str(lambda)]
-    tests
-    test_data_analysis
-    assert(lambda==lambdas(l));
+%     lambda = lambdas(l);
+%     lambda2= lambdas(l);
+%     ['Testing on lambda=' num2str(lambda)]
+%     tests
+%     test_data_analysis
+%     assert(lambda==lambdas(l));
     
     
     set(0,'DefaultTextInterpreter', 'latex')
@@ -33,13 +33,12 @@ for l = 1:length(lambdas)
     end
     for k = 1:9
         subplot(2,5,k)
-        a=cell2mat(full_deconvolved_BrACs(:,k))';
+        a=cell2mat(full_deconvolved_BrACs(2:end,k))';
         plot(a);
         hold on
         plot(u_total(k,:),'.')
         xlim([0,100])
         ylim([0,70])
-
     end
     title = sprintf('$\\lambda=$ %1.4g, $M=1$, $\\tau=5$, $N=32$, paradigm 5',lambdas(l));
     suptitle(title)

@@ -4,19 +4,18 @@ reprocess_data
 
  global lambda lambda2
 
- lambdas = [0.2, 0.3, 0.5, 1];
+ lambdas = [0.2, 0.4, 0.8];
 
 for l = 1:length(lambdas)
     %     % Everything tested with M=1, paradigm 5 only
 % 
-%     lambda = lambdas(l);
-%     lambda2= lambdas(l);
-%     ['Testing on lambda=' num2str(lambda)]
-%     tests
-%     test_data_analysis
-%     assert(lambda==lambdas(l));
-%     
-% 
+    lambda = lambdas(l);
+    lambda2= lambdas(l);
+    ['Testing on lambda=' num2str(lambda)]
+    tests
+    test_data_analysis
+    assert(lambda==lambdas(l));
+    
     
     figure
     
@@ -30,11 +29,6 @@ for l = 1:length(lambdas)
         plot(u_total(k,:),'.')
         xlim([0,100])
 
-%         if k==9
-%             leg=legend('P=8','P=16','P=32','P=64','interpolated BrAC');
-%             pos=get(leg,'position');
-%             set(leg,'position',[0.73,0.2,pos(3:4)])
-%         end
     end
     title = sprintf('$\\lambda=$ %1.4g, $M=1$, $\\tau=5$, $N=32$, paradigm 5',lambdas(l));
     suptitle(title)

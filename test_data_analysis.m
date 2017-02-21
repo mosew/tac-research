@@ -1,4 +1,4 @@
-load('REGTEST_tau5_noeps39_lambda_10^-0.823909.mat')
+%load('REGTEST_tau5_noeps39_lambda_10^-0.823909.mat')
 t=b;
 % m, p, paradigm, episode
 lambda

@@ -37,9 +37,11 @@ OPTIONS = optimset('Display','off','GradObj','on','MaxIter',5000,'MaxFunEvals',3
         
 badscale=0;
 lastwarn('')
+
 % Constrained minimization        
 [parms_star,FVAL,EXITFLAG,OUTPUT] = fmincon('JN_and_dJN_uspline',parms_init,Aineq,Bineq,Aeq,Beq,LB,UB,...
             NONLCON,OPTIONS);
+
 if lastwarn
     badscale=1;
     lastwarn('')
@@ -50,6 +52,16 @@ end
 q2_star = parms_star(1);
 q1M_star = parms_star(2:M+2);
 u_star  = parms_star(M+3:end)*SplinesP_linear;
+
+
+
+
+
+
+
+
+
+
 
 
 

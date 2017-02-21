@@ -12,7 +12,7 @@ for i = 1:9
     hold on
     %for p = 1:5
         % paradigm 5
-        a=cell2mat(full_deconvolved_BrACs(3:5,i))';
+        a=cell2mat(full_deconvolved_BrACs(2:end,i))';
         plot(a);
     %end
     

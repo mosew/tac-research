@@ -1,28 +1,23 @@
 %load('REGTEST_tau5_noeps39_lambda_10^-0.823909.mat')
 t=b;
 % m, p, paradigm, episode
-lambda
+global tau
 badscales=[];
-L2_errors = zeros(5,9);
-Linf_errors = zeros(5,9);
-AUC_errors = zeros(5,9);
-peak_time_errors = zeros(5,9);
-peak_height_errors = zeros(5,9);
-actual_errors = cell(5,9);
-full_deconvolved_BrACs = cell(5,9);
-trained_parameters = cell(5,9);
+L2_errors = zeros(4,9);
+Linf_errors = zeros(4,9);
+AUC_errors = zeros(4,9);
+peak_time_errors = zeros(4,9);
+peak_height_errors = zeros(4,9);
+actual_errors = cell(4,9);
+full_deconvolved_BrACs = cell(4,9);
+trained_parameters = cell(4,9);
 
 for para = 1:1
     for i = 1:9
         for m = 1:1
-            for p = 1:5
-%                 if m==1
-%                     s = t0(p,k,i);
-%                 else
-                    s=b(p,i);
-%                 end
+            for p = 1:4
+                s=b(p,i);
                 s=s{1};
-                
 %                 if s.badscale==1
 %                     badscales=[badscales;[p,i]];
 %                 end
@@ -34,9 +29,6 @@ for para = 1:1
                 actual_errors{p,i} = s.actual_error;
                 full_deconvolved_BrACs{p,i} = s.full_deconvolved_BrAC;
                 trained_parameters{p,i} = s.trained_parameters;
-%                 if m==1
-%                     trained_parameters{p,i} = trained_parameters{p,i}(1:2);
-%                 end
             end
         end
     end

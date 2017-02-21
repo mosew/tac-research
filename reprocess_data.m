@@ -18,7 +18,7 @@ data_BrAC_5122{8} = [0,22,data_BrAC_5122{8}(2:end)']';
 % should be 22, for some reason.
 
 %% Pad pads the beginning of each episode with 5*pad minutes of zeros
-pad = 6;
+pad = 0;
 cutoff = 2;
 
 data_TAC_5122 = cell(1,11);
@@ -75,8 +75,8 @@ data_BrAC_5122 = data_BrAC_5122(toUseIndex);
 
 %% Temp model?
 if temp_model ==0
-    if tau==2
-        save('ZD_Data_5122_minutes_tau2.mat');
+    if tau~=5
+        save(sprintf('ZD_Data_5122_minutes_tau%d.mat',tau));
     else
         save('ZD_Data_5122_minutes.mat');
     end

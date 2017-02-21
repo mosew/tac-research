@@ -1,6 +1,7 @@
 %% Run model for various values of M, P, testing paradigms, episodes
 global training test tau u_total
 global M P
+global lambda
 tau = 5;
 
 %% Call reprocess_data to define u_total, maybe other stuff?
@@ -98,6 +99,5 @@ for i = 1:9
         end
     end
 end
-global lambda
 ['Saving test results cell array']
-save(sprintf('REGTEST_tau5_noeps39_lambda_10^%f.mat',log10(lambda)))
+save(sprintf('REGTEST_tau5_noeps39_lambda_10^%0.2g.mat',log10(lambda)))

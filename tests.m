@@ -10,7 +10,7 @@ reprocess_data
 
 % tau=5,N=32
 % M, P, lambda, test paradigm, test episode
-b = cell(3,4,3,3,9);
+b = cell(3,4,3,3,5);
 
 Ms=[0,1,4];
 Ps=[15,30,60,120];
@@ -19,8 +19,8 @@ lambdas=[0.05,0.1,0.2];
 %% Run tests
 
 
-% For episodes 1 through 9 (excluded original episodes 3 and 9)
-for i = 1:9
+% For episodes 1 through 5 (excluded original episodes 3 and 9)
+for i = 1:5
     
     
     % For testing paradigms 1 through 5

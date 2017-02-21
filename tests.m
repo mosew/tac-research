@@ -1,19 +1,23 @@
 %% Run model for various values of M, P, testing paradigms, episodes
 global training test tau u_total
 global M P
-global lambda
+global lambda lambda2
 
 %% Call reprocess_data to define u_total, maybe other stuff?
-%reprocess_data
+reprocess_data
 
 %% Define cell array to hold test data
 
-% (M, )P, (test paradigm, )test episode
-b = cell(4,9);
+% tau=5,N=32
+% M, P, lambda, test paradigm, test episode
+b = cell(3,4,3,3,9);
+
+Ms=[0,1,4];
+Ps=[15,30,60,120];
+lambdas=[0.05,0.1,0.2];
 
 %% Run tests
 
-% % M=1 did best? i.e. diffusion coefficient linearly dependent on depth.
 
 % For episodes 1 through 9 (excluded original episodes 3 and 9)
 for i = 1:9
@@ -25,7 +29,9 @@ for i = 1:9
     % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
     % paradigm 4: training on all episodes
     % paradigm 5: training on all except test episode
-    for para = 5
+    for paraInd = 1:3
+        
+        para = paraInd +2;
         
         if para == 1
             training = i;
@@ -57,49 +63,45 @@ for i = 1:9
 
         
         % For various values of M
-        for Mind = 1
-            
-            M = 2^Mind;
-            
-            if M==1
-                M=0;
-            else
-                M=M/2;
-            end
-            
+        for Mind = 1:3
+            M = Ms(Mind);
             
             % For various values of P
-            for Pind = (3:6)
-                P = 2^Pind;
+            for Pind = 1:4
+                P = Ps(Pind);
                 
+                % For various regularizations
+                for lambdaInd = 1:3
+                    lambda = lambdas(lambdaInd);
+                    lambda2= lambdas(lambdaInd);
                 
-                % Run the minimization script and time it
-                tic
-                minimize_uspline
-                [M,P,para,i]
-                toc
-                
-                % Collect data from the run
-                test_u = [u_total(i,:),0];
-                [peak_est, peaktime_est] = max(u_star);
-                [peak_act, peaktime_act] = max(test_u);
-                
-                % Define struct of collected data
-                b{Pind-2,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
-                                             'full_deconvolved_BrAC',{u_star},...
-                                             'actual_error',{u_star-test_u},...
-                                             'L2_error',{sum((u_star-test_u).^2)},...
-                                             'Linf_error',{max(abs(u_star-test_u))},...
-                                             'AUC_error',{sum(u_star)-sum(test_u)},...
-                                             'peak_time_error',{tau*(peaktime_est-peaktime_act)},...
-                                             'peak_height_error',{peak_est-peak_act},...
-                                             'badscale',{badscale});
-                                
+                    
+                    % Run the minimization script and time it
+                    tic
+                    minimize_uspline
+                    [M,P,lambda,para,i]
+                    toc
 
+                    % Collect data from the run
+                    test_u = [u_total(i,:),0];
+                    [peak_est, peaktime_est] = max(u_star);
+                    [peak_act, peaktime_act] = max(test_u);
+
+                    % Define struct of collected data
+                    b{Mind,Pind,lambdaInd,paraInd,i} = struct('tau_M_P_lambda_paradigm_test',{[tau,M,P,lambda,para,i]},...
+                                                 'trained_parameters',{[q2_star,q1M_star]},...
+                                                 'full_deconvolved_BrAC',{u_star},...
+                                                 'actual_error',{u_star-test_u},...
+                                                 'L2_error',{sum((u_star-test_u).^2)},...
+                                                 'Linf_error',{max(abs(u_star-test_u))},...
+                                                 'AUC_error',{sum(u_star)-sum(test_u)},...
+                                                 'peak_time_error',{tau*(peaktime_est-peaktime_act)},...
+                                                 'peak_height_error',{peak_est-peak_act},...
+                                                 'badscale',{badscale});
+                end
             end    
         end
     end
 end
 ['Saving test results cell array']
-name=sprintf('REGTEST_tau5_noeps39_lambda_%1.4g.mat',lambda);
-save(name,'b')
+save('bigtest.m','b')

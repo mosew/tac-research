@@ -39,6 +39,9 @@ for i=1:length(t_TAC)
     max_n_in = max(max(length(t_TAC{i}),length(t_BrAC{i})),max_n_in);
 end
 
+% Not gonna use the above anymore -- just set it to 240 steps exactly.
+max_n_in = 240;
+
 % Number of timesteps in output vector
 n_out = floor(max_n_in * tau_in / tau_out);
 
@@ -55,27 +58,9 @@ for i = 1:m_total
     u_total(i,:)=max(interp1(t_BrAC{i},data_BrAC{i},time_out,'linear','extrap'),0);
     %u_total(i,:) = max( ppval(spline(t_BrAC{i},data_BrAC{i}),time_out), 0);
     %y_total(i,:) = max( ppval(spline(t_TAC{i},data_TAC{i}),time_out), 0);
- end
+end
  
+ 
+
 % % De-noise TAC spline
-% 
-
 y_total = max(sgolayfilt(y_total',2,7),0)';
-
-% y_total_ma = y_total;
-% b=2;
-% global n
-% for i=b+1:n-b
-%      y_total_ma(:,i)=mean(y_total(:,i-b:(i+b)),2);
-% end
-% y_total=y_total_ma;
-
-% order=2;
-% framelen=11;
-% B = sgolay(order,framelen);
-% for i = 1:size(y_total,1)
-%     y_total(i,:) = conv(y_total(i,:),B((framelen+1)/2,:),'same');
-% end
-
-% % De-noise BrAC spline
-%u_total = max(sgolayfilt(u_total',2,15),0)';

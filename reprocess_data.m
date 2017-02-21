@@ -13,12 +13,12 @@ end
 
 %% Fix some weirdness in translation.
 t_BrAC_5122{8} = [0,0.5,t_BrAC_5122{8}(2:end)];
-data_BrAC_5122{8} = [0,22,data_BrAC_5122{8}(2:end)']';
+data_BrAC_5122{8} = [0,32,data_BrAC_5122{8}(2:end)']';
 % From the spreadsheet, this 22 was read as a 32, but Susan thought it
 % should be 22, for some reason.
 
 %% Pad pads the beginning of each episode with 5*pad minutes of zeros
-pad = 0;
+pad = 6;
 cutoff = 2;
 
 data_TAC_5122 = cell(1,11);

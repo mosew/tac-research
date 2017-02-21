@@ -1,5 +1,5 @@
-load('REGTEST_tau5_noeps39_lambda0001.mat')
-t=test_data_tau5_noeps39_lambda0001;
+%load('REGTEST_tau5_noeps39_lambda0001.mat')
+%t=test_data_tau5_noeps39_lambda0001;
 % m, p, paradigm, episode
 
 badscales=[];
@@ -19,7 +19,7 @@ for para = 1:1
 %                 if m==1
 %                     s = t0(p,k,i);
 %                 else
-                    s=t(p,i);
+                    s=b(p,i);
 %                 end
                 s=s{1};
                 
@@ -44,49 +44,52 @@ end
 
 
 logL2_errors = log(L2_errors);
-logL2_MSE = mean(logL2_errors,4);
+logL2_MSE = mean(logL2_errors,2);
 
 % Calculate the mean and SD of error measures across episodes.
-L2_MSE = mean(L2_errors,4);
-Linf_error_means = mean(Linf_errors,4);
-AUC_MSE = mean(AUC_errors.^2,4);
-peak_time_MSE = mean(peak_time_errors.^2,4);
-peak_height_MSE = mean(peak_height_errors.^2,4);
+L2_MSE = mean(L2_errors,2);
+Linf_error_means = mean(Linf_errors,2);
+AUC_MSE = mean(AUC_errors.^2,2);
+peak_time_MSE = mean(peak_time_errors.^2,2);
+peak_height_MSE = mean(peak_height_errors.^2,2);
 
-AUC_error_means = mean(AUC_errors,4);
-peak_height_error_means = mean(peak_height_errors,4);
-peak_time_error_means = mean(peak_time_errors,4);
+AUC_error_means = mean(AUC_errors,2);
+peak_height_error_means = mean(peak_height_errors,2);
+peak_time_error_means = mean(peak_time_errors,2);
 
-L2_MSE_sd = std(L2_errors,0,4);
-logL2_sd = std(logL2_errors,0,4);
-Linf_sd = std(Linf_errors,0,4);
-AUC_error_sd = std(AUC_errors,0,4);
-peak_time_sd = std(peak_time_errors,0,4);
-peak_height_sd = std(peak_height_errors,0,4);
+L2_MSE_sd = std(L2_errors,0,2);
+logL2_sd = std(logL2_errors,0,2);
+Linf_sd = std(Linf_errors,0,2);
+AUC_error_sd = std(AUC_errors,0,2);
+peak_time_sd = std(peak_time_errors,0,2);
+peak_height_sd = std(peak_height_errors,0,2);
 
-AUC_MSE_sd = std(AUC_errors.^2,0,4);
-peak_time_MSE_sd = std(peak_time_errors.^2,0,4);
-peak_height_MSE_sd = std(peak_height_errors.^2,0,4);
+AUC_MSE_sd = std(AUC_errors.^2,0,2);
+peak_time_MSE_sd = std(peak_time_errors.^2,0,2);
+peak_height_MSE_sd = std(peak_height_errors.^2,0,2);
 
-% Calculate mean and standard error across M
-L2_MSE_M = mean(L2_errors,1);
-Linf_error_means_M = mean(Linf_errors,1);
-AUC_MSE_M = mean(AUC_errors.^2,1);
-peak_time_MSE_M = mean(peak_time_errors.^2,1);
-peak_height_MSE_M = mean(peak_height_errors.^2,1);
+['Saving arrays']
+save(sprintf('REGTEST_data_arrays_tau5_noeps39_lambda_10^%d.mat',round(log10(lambda))));
 
-AUC_error_means_M = mean(AUC_errors,1);
-peak_height_error_means_M = mean(peak_height_errors,1);
-peak_time_error_means_M = mean(peak_time_errors,1);
-
-
-L2_MSE_sd_M = std(L2_errors,0,1);
-logL2_sd_M = std(logL2_errors,0,1);
-Linf_sd_M = std(Linf_errors,0,1);
-AUC_error_sd_M = std(AUC_errors,0,1);
-peak_time_sd_M = std(peak_time_errors,0,1);
-peak_height_sd_M = std(peak_height_errors,0,1);
-
-AUC_MSE_sd_M = std(AUC_errors.^2,0,1);
-peak_time_MSE_sd_M = std(peak_time_errors.^2,0,1);
-peak_height_MSE_sd_M = std(peak_height_errors.^2,0,1);
+% % Calculate mean and standard error across M
+% L2_MSE_M = mean(L2_errors,1);
+% Linf_error_means_M = mean(Linf_errors,1);
+% AUC_MSE_M = mean(AUC_errors.^2,1);
+% peak_time_MSE_M = mean(peak_time_errors.^2,1);
+% peak_height_MSE_M = mean(peak_height_errors.^2,1);
+% 
+% AUC_error_means_M = mean(AUC_errors,1);
+% peak_height_error_means_M = mean(peak_height_errors,1);
+% peak_time_error_means_M = mean(peak_time_errors,1);
+% 
+% 
+% L2_MSE_sd_M = std(L2_errors,0,1);
+% logL2_sd_M = std(logL2_errors,0,1);
+% Linf_sd_M = std(Linf_errors,0,1);
+% AUC_error_sd_M = std(AUC_errors,0,1);
+% peak_time_sd_M = std(peak_time_errors,0,1);
+% peak_height_sd_M = std(peak_height_errors,0,1);
+% 
+% AUC_MSE_sd_M = std(AUC_errors.^2,0,1);
+% peak_time_MSE_sd_M = std(peak_time_errors.^2,0,1);
+% peak_height_MSE_sd_M = std(peak_height_errors.^2,0,1);

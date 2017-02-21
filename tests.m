@@ -1,17 +1,16 @@
 %% Run model for various values of M, P, testing paradigms, episodes
-
 global training test tau u_total
 global M P
 tau = 5;
 
 %% Call reprocess_data to define u_total, maybe other stuff?
-reprocess_data
+%reprocess_data
 
 %% Define cell array to hold test data
 
 % M, P, test paradigm, test episode
 
-test_data_tau5_noeps39_lambda0pt15 = cell(5,9);
+b = cell(5,9);
 
 %% Run tests
 
@@ -72,7 +71,7 @@ for i = 1:9
                 % Run the minimization script and time it
                 tic
                 minimize_uspline
-                [Mind,P,para,i]
+                [P,i]
                 toc
                 
                 % Collect data from the run
@@ -84,7 +83,7 @@ for i = 1:9
                 [peak_act, peaktime_act] = max(test_u_end);
                 
                 % Define struct of collected data
-                test_data_tau5_noeps39_lambda0pt15{Pind-1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
+                b{Pind-1,i} = struct('trained_parameters',{[q2_star,q1M_star]},...
                                              'full_deconvolved_BrAC',{u_star_orig},...
                                              'actual_error',{u_star_end-test_u_end},...
                                              'L2_error',{sum((u_star_end-test_u_end).^2)},...
@@ -93,9 +92,12 @@ for i = 1:9
                                              'peak_time_error',{tau*(peaktime_est-peaktime_act)},...
                                              'peak_height_error',{peak_est-peak_act},...
                                              'badscale',{badscale});
-                                         
+                                
 
             end    
         end
     end
 end
+global lambda
+['Saving test results cell array']
+save(sprintf('REGTEST_tau5_noeps39_lambda_10^%f.mat',log10(lambda)))

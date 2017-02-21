@@ -69,7 +69,7 @@ peak_time_MSE_sd = std(peak_time_errors.^2,0,2);
 peak_height_MSE_sd = std(peak_height_errors.^2,0,2);
 
 ['Saving arrays']
-save(sprintf('REGTEST_data_arrays_tau5_noeps39_lambda_10^%1.4g.mat',log10(lambda)));
+save(sprintf('REGTEST_data_arrays_tau5_noeps39_lambda_%1.4g.mat',lambda));
 
 % % Calculate mean and standard error across M
 % L2_MSE_M = mean(L2_errors,1);

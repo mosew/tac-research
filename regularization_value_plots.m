@@ -4,7 +4,7 @@ reprocess_data
 
  global lambda lambda2
 
- lambdas = [0.2, 0.4, 0.8];
+ lambdas = [0.4, 0.8];
 
 for l = 1:length(lambdas)
     %     % Everything tested with M=1, paradigm 5 only

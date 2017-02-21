@@ -100,4 +100,4 @@ for i = 1:9
     end
 end
 ['Saving test results cell array']
-save(sprintf('REGTEST_tau5_noeps39_lambda_10^%0.2g.mat',log10(lambda)))
+save(sprintf('REGTEST_tau5_noeps39_lambda_%1.4g.mat',lambda))

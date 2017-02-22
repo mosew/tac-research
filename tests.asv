@@ -1,31 +1,25 @@
 %% Run model for various values of M, P, testing paradigms, episodes
-
-%% Set up globals
 global training test tau u_total
 global M P
 global lambda lambda2
 
 %% Call reprocess_data to define u_total, maybe other stuff?
-fprintf('Processing raw data...\n')
 reprocess_data
 
 %% Define cell array to hold test data
 
 % tau=5,N=32
-
 % M, P, lambda, test paradigm, test episode
 
-Ms=[0];
-Ps=[120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20.
-lambdas=[0.1];
+Ms=[0,1,4];
+Ps=[60,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20.
+lambdas=[0.05,0.1,0.2];
 paradigms =[3,5];
-testeps=4:5;
-fprintf('Creating empty cell array\n')
+testeps=4:7;
 b = cell(length(Ms),length(Ps),length(lambdas),length(paradigms),length(testeps));
-fprintf('Done creating empty cell array\n')
 numRuns=numel(b);
 thisRun=0;
-rtTot=0;
+rTot=0;
 %% Run tests
 
 
@@ -39,8 +33,9 @@ for j = 1:length(testeps)
     % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
     % paradigm 4: training on all episodes
     % paradigm 5: training on all except test episode
-    for paraInd = 1:length(paradigms)
-        para = paradigms(paraInd);
+    paraInd = 0;
+    for para = paradigms
+        paraInd = paraInd+1;
         if para == 1
             training = i;
         end
@@ -86,14 +81,13 @@ for j = 1:length(testeps)
                     
                     % Run the minimization script and time it
                     tic
-                    fprintf('Testing on M=%i, P=%i, lambda=%0.3g, paradigm=%i, test episode=%i',M,P,lambda,para,i)
                     minimize_uspline
-                    r=toc;
+                    r=toc
 
                     thisRun = thisRun +1;
-                    fprintf('Completed %i / %i \n', thisRun,numRuns)
-                    rtTot = rtTot+r;
-                    fprintf('Average time per run=%f s\n',rtTot/thisRun);
+                    fprintf('Completed %i / %i', thisRun,numRuns)
+                    rTot = rTot+r
+                    fprintf('Average time per run=%f',rTot/thisRun);
 
                     % Collect data from the run
                     test_u = [u_total(i,:),0];
@@ -107,8 +101,7 @@ for j = 1:length(testeps)
                     end
                     
                     % Define and collect struct of collected data
-                    b{Mind,Pind,lambdaInd,paraInd,i} = struct('tau',{tau},'M',{M},'P',{P},'lambda',{lambda},...
-                                                 'testing_paradigm',{para},'test_episode',{i},...
+                    b{Mind,Pind,lambdaInd,paraInd,i} = struct('tau',{tM_P_lambda_paradigm_test',{[tau,M,P,lambda,para,testeps(i)]},...
                                                  'trained_parameters',{[q2_star,q1M_star]},...
                                                  'full_deconvolved_BrAC',{u_star},...
                                                  'actual_error',{u_star-test_u},...

@@ -10,17 +10,18 @@ reprocess_data
 
 % tau=5,N=32
 % M, P, lambda, test paradigm, test episode
-b = cell(3,4,3,3,5);
+b = cell(1,1,3,1,5);
 
-Ms=[0,1,4];
-Ps=[15,30,60,120];
-lambdas=[0.05,0.1,0.2];
+Ms=[1];
+Ps=[120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20.
+lambdas=[0.01,0.05,0.1];
 
 %% Run tests
 
 
 % For episodes 1 through 5 (excluded original episodes 3 and 9)
-for i = 1:5
+testeps=1:5;
+for i = testeps
     
     
     % For testing paradigms 1 through 5
@@ -29,9 +30,10 @@ for i = 1:5
     % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
     % paradigm 4: training on all episodes
     % paradigm 5: training on all except test episode
-    for paraInd = 1:3
+    paradigms=1;
+    for paraInd = paradigms
         
-        para = paraInd +2;
+        para = para - para(paraInd(1)) + 1;
         
         if para == 1
             training = i;
@@ -63,15 +65,15 @@ for i = 1:5
 
         
         % For various values of M
-        for Mind = 1:3
+        for Mind = 1:length(Ms)
             M = Ms(Mind);
             
             % For various values of P
-            for Pind = 1:4
+            for Pind = 1:length(Ps)
                 P = Ps(Pind);
                 
                 % For various regularizations
-                for lambdaInd = 1:3
+                for lambdaInd = 1:length(lambdas)
                     lambda = lambdas(lambdaInd);
                     lambda2= lambdas(lambdaInd);
                 
@@ -86,7 +88,11 @@ for i = 1:5
                     test_u = [u_total(i,:),0];
                     [peak_est, peaktime_est] = max(u_star);
                     [peak_act, peaktime_act] = max(test_u);
-
+                    
+                    if Mind==1
+                        M=0;
+                    end
+                    
                     % Define struct of collected data
                     b{Mind,Pind,lambdaInd,paraInd,i} = struct('tau_M_P_lambda_paradigm_test',{[tau,M,P,lambda,para,i]},...
                                                  'trained_parameters',{[q2_star,q1M_star]},...
@@ -98,10 +104,17 @@ for i = 1:5
                                                  'peak_time_error',{tau*(peaktime_est-peaktime_act)},...
                                                  'peak_height_error',{peak_est-peak_act},...
                                                  'badscale',{badscale});
+                                             
+                    if Mind==1
+                        if q1M_star(1)~=q1M_star(2)
+                            fprintf('CONSTANT DIFFUSIVITY RUN BROKEN')
+                        end
+                    end
+                    
                 end
             end    
         end
     end
 end
-['Saving test results cell array']
-save('bigtest.m','b')
+%['Saving test results cell array']
+%save('bigtest_regH012_retry.m','b')

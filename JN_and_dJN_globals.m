@@ -100,4 +100,4 @@ global CNhat
 
 global Reg dReg
     Reg = @(qM,u) lambda*sum(u.^2) + lambda2*sum(diff(u).^2);
-    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda2*[diff(diff(u)),-u(end-1),-u(end)])];
+    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda*[diff(u),0] + lambda2*[diff(diff(u)),0,0])];

@@ -68,7 +68,7 @@ peak_time_MSE_sd = std(peak_time_errors.^2,0,5);
 peak_height_MSE_sd = std(peak_height_errors.^2,0,5);
 
 ['Saving arrays']
-save('bigtest_regH012_retry_lambda0.2only_arrays.mat');
+save('bigtest_regH012_retry_arrays.mat');
 
 % % Calculate mean and standard error across M
 % L2_MSE_M = mean(L2_errors,1);

@@ -9,17 +9,18 @@ global lambda lambda2
 fprintf('Processing raw data...\n')
 reprocess_data
 
-%% Define cell array to hold test data
-
+%% Define test parameters
 % tau=5,N=32
 
 % M, P, lambda, test paradigm, test episode
 
-Ms=[0];
-Ps=[120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20.
-lambdas=[0.1];
-paradigms =[3,5];
-testeps=4:5;
+Ms=[0,1,4];
+Ps=[60,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20.
+lambdas=[0.2];
+paradigms =[3,4,5];
+testeps=1:5;
+
+%% Define cell array to hold test data
 fprintf('Creating empty cell array\n')
 b = cell(length(Ms),length(Ps),length(lambdas),length(paradigms),length(testeps));
 fprintf('Done creating empty cell array\n')
@@ -29,8 +30,11 @@ rtTot=0;
 %% Run tests
 
 
-% For episodes 1 through 5 (excluded original episodes 3 and 9)
+% Excluded original episodes 3 and 9
+% Excluded 3 because (adjusted) TAC signal never returns to 0
+% Excluded 9 because Susan took off the bracelet during the depisode
 for j = 1:length(testeps)
+    % Current test episode
     i=testeps(j);
     
     % For testing paradigms 1 through 5
@@ -86,7 +90,7 @@ for j = 1:length(testeps)
                     
                     % Run the minimization script and time it
                     tic
-                    fprintf('Testing on M=%i, P=%i, lambda=%0.3g, paradigm=%i, test episode=%i',M,P,lambda,para,i)
+                    fprintf('Testing on M=%i, P=%i, lambda=%0.3g, paradigm=%i, test episode=%i \n',M,P,lambda,para,i)
                     minimize_uspline
                     r=toc;
 
@@ -131,5 +135,5 @@ for j = 1:length(testeps)
         end
     end
 end
-['Saving test results cell array']
-save('bigtest_regH012_retry.mat','b')
+fprintf('Saving test results cell array')
+save('bigtest_regH012_retry_lambda0.2only.mat','b')

@@ -15,9 +15,9 @@ reprocess_data
 % M, P, lambda, test paradigm, test episode
 
 Ms=[0,1,4];
-Ps=[60,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20.
-lambdas=[0.2];
-paradigms =[3,4,5];
+Ps=[60,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
+lambdas=[0.05,0.1];
+paradigms =[3,5];
 testeps=1:5;
 
 %% Define cell array to hold test data
@@ -27,6 +27,7 @@ fprintf('Done creating empty cell array\n')
 numRuns=numel(b);
 thisRun=0;
 rtTot=0;
+
 %% Run tests
 
 
@@ -36,6 +37,7 @@ rtTot=0;
 for j = 1:length(testeps)
     % Current test episode
     i=testeps(j);
+    
     
     % For testing paradigms 1 through 5
     % paradigm 1: training and testing on same episode
@@ -62,7 +64,7 @@ for j = 1:length(testeps)
                 training = [(i+1):min(i+4,9),1:(i+4-9)];
             end
         end
-        if para==4
+        if para == 4
             training = 1:9;
         end
         if para == 5
@@ -125,7 +127,7 @@ for j = 1:length(testeps)
                                              
                     if Mind==1
                         if q1M_star(1)~=q1M_star(2)
-                            fprintf('CONSTANT DIFFUSIVITY RESTRICTION BROKEN')
+                            fprintf('CONSTANT DIFFUSIVITY RESTRICTION BROKEN\n')
                         end
                     end
                     
@@ -135,5 +137,5 @@ for j = 1:length(testeps)
         end
     end
 end
-fprintf('Saving test results cell array')
-save('bigtest_regH012_retry_lambda0.2only.mat','b')
+fprintf('Saving test results cell array\n')
+save('bigtest_regH02.mat','b')

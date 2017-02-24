@@ -98,6 +98,6 @@ global CNhat
 % lambda = 0.15;
 % lambda2 = 0.15;
 
-global Reg dReg
-    Reg = @(qM,u) lambda*sum(u.^2) + lambda2*sum(diff(u).^2);
-    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda*[diff(u),0] + lambda2*[diff(diff(u)),0,0])];
+global Reg dReg lambda lambda2
+    Reg = @(qM,u) lambda*sum(u.^2) + lambda2*sum(diff(u).^2);%+lambda*sum(diff(diff(u)).^2);
+    dReg = @(qM,u) [zeros(1,M+2), 2*(lambda*u + lambda2*[diff(diff(u)),0,0])];% + lambda*[diff(diff(diff(u))),0,0,0])];

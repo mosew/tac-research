@@ -3,9 +3,11 @@
 
 global tau M N P
     N=32; % state and evolution operator discretization index
-     tau=5;% timestep (in MINUTES)
-     M=1; % Q discretization index
-     P=40; % U discretization index. number of splines per episode.
+    
+    % KEep these commented out
+%      tau=5;% timestep (in MINUTES)
+%      M=1; % Q discretization index
+%      P=40; % U discretization index. number of splines per episode.
 
 
 % Set training and test sets

@@ -14,10 +14,10 @@ reprocess_data
 
 % M, P, lambda, test paradigm, test episode
 
-Ms=[1];
-Ps=[40,80]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
+Ms=[0];
+Ps=[40,60,80]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
 lambdas=[0.1];
-paradigms =[5];
+paradigms =[3,5,6];
 testeps=1:9;
 
 %% Define cell array to hold test data
@@ -45,6 +45,7 @@ for j = 1:length(testeps)
     % paradigm 3: testing on i, training on i+1 : i+4 (wraparound)
     % paradigm 4: training on all episodes
     % paradigm 5: training on all except test episode
+    % paradigm 6: training on episodes i+1:i+3
     for paraInd = 1:length(paradigms)
         para = paradigms(paraInd);
         if para == 1
@@ -69,6 +70,13 @@ for j = 1:length(testeps)
         end
         if para == 5
             training = [1:(i-1),(i+1):9];
+        end
+        if para == 6
+            if i<=6
+                training = (i+1):i+3;
+            else
+                training = [(i+1):min(i+3,9),1:(i+3-9)];
+            end
         end
         
         
@@ -138,4 +146,4 @@ for j = 1:length(testeps)
     end
 end
 fprintf('Saving test results cell array\n')
-save('smalltest_24splhr_alleps_regH02.mat','b')
+save('022717_234_splhr.mat','b')

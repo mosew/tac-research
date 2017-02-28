@@ -14,11 +14,11 @@ reprocess_data
 
 % M, P, lambda, test paradigm, test episode
 
-Ms=[0,1,4];
-Ps=[60,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
-lambdas=[0.05,0.1];
-paradigms =[3,5];
-testeps=1:5;
+Ms=[1];
+Ps=[40,80]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
+lambdas=[0.1];
+paradigms =[5];
+testeps=1:9;
 
 %% Define cell array to hold test data
 fprintf('Creating empty cell array\n')
@@ -138,4 +138,4 @@ for j = 1:length(testeps)
     end
 end
 fprintf('Saving test results cell array\n')
-save('bigtest_regH02.mat','b')
+save('smalltest_24splhr_alleps_regH02.mat','b')

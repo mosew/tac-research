@@ -14,11 +14,11 @@ actual_errors = cell(bsize);
 full_deconvolved_BrACs = cell(bsize);
 trained_parameters = cell(bsize);
 
-for m = 1:3
+for m = 1:1
     for p = 1:2
-        for lamb = 1:2
-            for para = 1:2
-                for i = 1:5
+        for lamb = 1:1
+            for para = 1:1
+                for i = 1:9
                     s=b(m,p,lamb,para,i);
                     s=s{1};
                     
@@ -67,28 +67,25 @@ AUC_MSE_sd = std(AUC_errors.^2,0,5);
 peak_time_MSE_sd = std(peak_time_errors.^2,0,5);
 peak_height_MSE_sd = std(peak_height_errors.^2,0,5);
 
-['Saving arrays']
-save('bigtest_regH02_arrays.mat');
+% Calculate mean and standard error across M
+L2_MSE_M = mean(L2_errors,1);
+Linf_error_means_M = mean(Linf_errors,1);
+AUC_MSE_M = mean(AUC_errors.^2,1);
+peak_time_MSE_M = mean(peak_time_errors.^2,1);
+peak_height_MSE_M = mean(peak_height_errors.^2,1);
 
-% % Calculate mean and standard error across M
-% L2_MSE_M = mean(L2_errors,1);
-% Linf_error_means_M = mean(Linf_errors,1);
-% AUC_MSE_M = mean(AUC_errors.^2,1);
-% peak_time_MSE_M = mean(peak_time_errors.^2,1);
-% peak_height_MSE_M = mean(peak_height_errors.^2,1);
-% 
-% AUC_error_means_M = mean(AUC_errors,1);
-% peak_height_error_means_M = mean(peak_height_errors,1);
-% peak_time_error_means_M = mean(peak_time_errors,1);
-% 
-% 
-% L2_MSE_sd_M = std(L2_errors,0,1);
-% logL2_sd_M = std(logL2_errors,0,1);
-% Linf_sd_M = std(Linf_errors,0,1);
-% AUC_error_sd_M = std(AUC_errors,0,1);
-% peak_time_sd_M = std(peak_time_errors,0,1);
-% peak_height_sd_M = std(peak_height_errors,0,1);
-% 
-% AUC_MSE_sd_M = std(AUC_errors.^2,0,1);
-% peak_time_MSE_sd_M = std(peak_time_errors.^2,0,1);
-% peak_height_MSE_sd_M = std(peak_height_errors.^2,0,1);
+AUC_error_means_M = mean(AUC_errors,1);
+peak_height_error_means_M = mean(peak_height_errors,1);
+peak_time_error_means_M = mean(peak_time_errors,1);
+
+
+L2_MSE_sd_M = std(L2_errors,0,1);
+logL2_sd_M = std(logL2_errors,0,1);
+Linf_sd_M = std(Linf_errors,0,1);
+AUC_error_sd_M = std(AUC_errors,0,1);
+peak_time_sd_M = std(peak_time_errors,0,1);
+peak_height_sd_M = std(peak_height_errors,0,1);
+
+AUC_MSE_sd_M = std(AUC_errors.^2,0,1);
+peak_time_MSE_sd_M = std(peak_time_errors.^2,0,1);
+peak_height_MSE_sd_M = std(peak_height_errors.^2,0,1);

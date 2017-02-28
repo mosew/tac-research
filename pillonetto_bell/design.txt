@@ -1,0 +1,142 @@
+Pillonetto-Bell algorithm design
+
+BEFORE RUNNING
+--------------
+-Prove theorem allowing us to take L^[N,P]_i instead of L_i and let [N,P]-->infty.
+
+-Compute prior error covariance (v_i must be Gaussian according to assumptions)
+	y_i = L_i (q;u) + v_i, i = 1,...,n.
+	
+	V will be an nxn matrix.
+		In our case we fixed n at 240. We will probably assume the last many are independent.
+
+-Verify assumptions in PB paper:
+	1a. Given q and u, v is a zero-mean Gaussian random vector with
+		positive definite covariance matrix V(y|q,u).
+	1b. Given q, v and u are independent.
+	2a. Given q, u is given by
+				u(t) = sum_j=1^infty a_j*phi_j(t)
+		where each a_j is N(0,lambda_j(q)).
+	2b. a_j is independent of v for each j
+	2c. If j!=k, a_j and a_k are independent.
+
+	
+-Fix parameters of deconvolution scheme (tau,n(=T/tau, so T also acceptable),N,M,P,lambda,training paradigm)
+
+
+-Fix reproducing (Mercer) kernel
+	First or second-order Green's kernel?
+	
+	Compute eigenfunctions and eigenvalues of reproducing kernel
+		as in paper appendix
+	
+	Figure out the norm in the RKHS (for loss function evaluation)
+		Possibly unnecessary?
+	
+	
+-Fix prior on q
+	p(q) as a function of q (needed for acceptance function)
+		Look at distributions of q over trained episodes, weighted by some performance measure, or
+		assume Gaussian or whatever, compute sample mean and variance for some parameter set.
+
+
+	
+	
+	
+MAIN ALGORITHM
+--------------
+
+
+Compute MLE of q given y, i.e. argmax[ p(y|q)p(q) ]
+	set to initial guess for q
+Compute MLE of u given y, i.e. argmax[ p(u|MLE(q), y) ]
+	set to inital guess for u
+	
+	Might just use output of Gary's algorithm for the above.
+	If not, general purpose optimizer
+	
+	
+Compute (initial) approximate (Cramer-Rao) covariance matrix of q
+
+	
+Iteration k, until convergence.
+	Sample q_try from N( q^(k-1), alpha*Vhat) [see below for description of alpha]
+	Sample c from U(0,1)
+	Set q^(k) as follows:
+		
+		q^(k) = q_try IF c<= [p(y|q)p(q)] / [p(y|q^(k-1))p(q^(k-1)]
+				q^(k-1) ELSE.
+				
+	Compute (formulas given in lemma 10)
+		a_bar^(k) = E(a^P|q^(k),y)
+		V_bar^k   = V(a^P|q^(k),y)
+	
+	Sample a^(k) from N(a_bar^(k),V_bar(k))
+	
+	
+THEN
+----
+Figure out alpha so that acceptance rate of MCMC samples is ~.23
+	Trial and error on main algorithm.
+	Does it depend on P?
+
+	
+ALGORITHM TO DETERMINE VALUE FOR P
+----------------------------------
+Choose some initial P and gamma>1
+Get sequence q^(k) from main algorithm
+Iteration:
+	Simulate sequence of K amplitudes a^(k)in R^P, using sequence q^(k) and MCMC algorithm
+	Simulate sequence of K amplitudes b^(k)in R^ceil(gamma*P) same way
+	If the a and b approximations for E(u|y) and the 95% confidence limits are within
+		"the prescribed tolerance" (see below) then terminate and return b
+	If not, set P=ceil(gamma*P) and iterate.
+
+	
+		
+NECESSARY HELPER ALGORITHMS
+---------------------------
+Importing solution of deterministic problem
+	Need MLE of q, MLE of u
+	In what form?
+	
+o Computing eigenfunctions and eigenvalues for reproducing kernel 
+	see paper's appendix for 2nd order Green:
+		computing alpha, which both eigenfunction and eigenvalue depend on
+		eigenfunction
+			coefficients C1,C2,C3,C4
+		eigenvalue
+			(T/alpha)^4
+
+o Computing p(q) (prior on q)
+	Examine the trained parameters
+	Gaussian? If constant diffusivity, N(.0046, 4e-7)
+	Exponential?
+	
+	
+o Computing p(y|q) as function of q
+	In paper.
+
+o Computing acceptance function
+	
+Computing V(y|q)
+	V(y|q) = L^s_i(q, L^t_j(q, K(s,t) )) + V(y|q,u)_ij
+
+Computing Vhat (covariance estimate of q)
+	By hand
+	Depending on p(q).
+	Vhat = inv( -(D_q)^2 log[p(y|q)p(q)] )
+
+	
+o Computing V(y|q,u) (forward error covariance)
+	Estimation of covariance
+
+Computing prescribed tolerance
+	Prescribed tolerance: Let x_[k] be the k^th order statistic, k=1,...,K.
+	Quantile function
+	Q_q(x_[k]):=(qK-floor(qK)) * (x_[ceil(qK)]) + (ceil(qK) - qK) * x_[qK]
+	lower and upper confidence limits: f_k(t) is function calculated using k^th MCMC draw a^(k).
+		f_L^P(t):=Q_(0.025)({f_k(t)})
+		f_U^P(t):=Q_(0.975)({f_k(t)})
+		f_M^P(t):=1/K * sum(f_k(t))
+	where P is chosen such that integral conditions on p1705 hold.

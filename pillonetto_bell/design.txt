@@ -58,6 +58,7 @@ Compute MLE of u given y, i.e. argmax[ p(u|MLE(q), y) ]
 	
 Compute (initial) approximate (Cramer-Rao) covariance matrix of q
 
+
 	
 Iteration k, until convergence.
 	Sample q_try from N( q^(k-1), alpha*Vhat) [see below for description of alpha]
@@ -96,9 +97,7 @@ Iteration:
 		
 NECESSARY HELPER ALGORITHMS
 ---------------------------
-Importing solution of deterministic problem
-	Need MLE of q, MLE of u
-	In what form?
+o Importing solution of deterministic problem
 	
 o Computing eigenfunctions and eigenvalues for reproducing kernel 
 	see paper's appendix for 2nd order Green:
@@ -110,7 +109,7 @@ o Computing eigenfunctions and eigenvalues for reproducing kernel
 
 o Computing p(q) (prior on q)
 	Examine the trained parameters
-	Gaussian? If constant diffusivity, N(.0046, 4e-7)
+	Gaussian? If constant diffusivity, N(mu = .0046, sigma^2 = 4e-7)
 	Exponential?
 	
 	
@@ -119,7 +118,7 @@ o Computing p(y|q) as function of q
 
 o Computing acceptance function
 	
-Computing V(y|q)
+o Computing V(y|q)
 	V(y|q) = L^s_i(q, L^t_j(q, K(s,t) )) + V(y|q,u)_ij
 
 Computing Vhat (covariance estimate of q)
@@ -133,10 +132,10 @@ o Computing V(y|q,u) (forward error covariance)
 
 Computing prescribed tolerance
 	Prescribed tolerance: Let x_[k] be the k^th order statistic, k=1,...,K.
-	Quantile function
-	Q_q(x_[k]):=(qK-floor(qK)) * (x_[ceil(qK)]) + (ceil(qK) - qK) * x_[qK]
-	lower and upper confidence limits: f_k(t) is function calculated using k^th MCMC draw a^(k).
-		f_L^P(t):=Q_(0.025)({f_k(t)})
-		f_U^P(t):=Q_(0.975)({f_k(t)})
-		f_M^P(t):=1/K * sum(f_k(t))
-	where P is chosen such that integral conditions on p1705 hold.
+	Quantile function:
+		Q_w(x_[k]):=(wK-floor(wK)) * (x_[ceil(wK)]) + (ceil(wK) - wK) * x_[wK]
+		lower and upper confidence limits: f_k(t) is function calculated using k^th MCMC draw a^(k).
+			f_L^P(t):=Q_(0.025)({f_k(t)})
+			f_U^P(t):=Q_(0.975)({f_k(t)})
+			f_M^P(t):=1/K * sum(f_k(t))
+		where P is chosen such that integral conditions on p1705 hold.

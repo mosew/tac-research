@@ -1,17 +1,16 @@
 %plot errors
 
 reprocess_data
-%load('bigtest_regH012_retry_arrays.mat');
 
 figure
 for i = 1:9
     subplot(2,5,i)
     hold on
     %m,p,la,para,i
-    a=cell2mat(full_deconvolved_BrACs(1,:,1,1,i)')';
+    a=cell2mat(full_deconvolved_BrACs(1,1,1,1,i)')';
         
 
-     size(a)
+     %  size(a)
 %     
 %     a=permute(a,[2,3,1]);
 %     a=permute(a,[2,4,1,3]);
@@ -27,7 +26,7 @@ for i = 1:9
     ylim([0,75])
     
     if i==9
-        h=legend('2spl/hr','4spl/hr','sampled BrAC','interpolated BrAC','shifted & smoothed TAC');
+        h=legend('2spl/hr','sampled BrAC','interpolated BrAC','shifted & smoothed TAC');
         pos=get(h,'position');
         set(h,'position',[0.65,0.2,pos(3:4)])
     end

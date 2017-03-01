@@ -9,7 +9,6 @@ global tau M N P
 %      M=1; % Q discretization index
 %      P=40; % U discretization index. number of splines per episode.
 
-
 % Set training and test sets
 global training test
 %  training = 1:9;

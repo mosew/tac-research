@@ -12,7 +12,7 @@ function Vy_given_q = Vy_given_q(q,P)
     data_path = '022717_234_splhr_arrays.mat';
     
     
-    global tau M n
+    global tau n
     load(data_path);
     M=1;
     T=n*tau;
@@ -40,5 +40,7 @@ function Vy_given_q = Vy_given_q(q,P)
             Vy_given_q(i,k) = sum(eivs'.*convolved_sampled_eifs(:,i).*convolved_sampled_eifs(:,k)) + meas_noise(i,k);
         end
     end
+    
+    % Doesn't come out right. Maybe the episodes are too long?
     
 end

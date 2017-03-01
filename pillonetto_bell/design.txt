@@ -119,7 +119,7 @@ o Computing p(y|q) as function of q
 o Computing acceptance function
 	
 o Computing V(y|q)
-	V(y|q) = L^s_i(q, L^t_j(q, K(s,t) )) + V(y|q,u)_ij
+	V(y|q)_ik = L_i(q,phi_j(t))* L_k(q,phi_j(t)) + V(y|q,u)_ik
 
 Computing Vhat (covariance estimate of q)
 	By hand

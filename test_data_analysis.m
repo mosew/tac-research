@@ -14,26 +14,27 @@ actual_errors = cell(bsize);
 full_deconvolved_BrACs = cell(bsize);
 trained_parameters = cell(bsize);
 
-for m = 1:1
-    for p = 1:3
-        for lamb = 1:1
-            for para = 1:3
-                for i = 1:9
-                    s=b(m,p,lamb,para,i);
+for m = 1:bsize(1)
+    for p = 1:bsize(2)
+        for lamb = 1:bsize(3)
+            for para = 1:bsize(4)
+                for ii = 1:bsize(5)
+                    
+                    s=b(m,p,lamb,para,ii);
                     s=s{1};
                     
                     if s.badscale==1
-                        badscales=[badscales;[m,p,lamb,para,i]];
+                        badscales=[badscales;[m,p,lamb,para,ii]];
                     end
                     
-                    L2_errors(m,p,lamb,para,i) = s.L2_error;
-                    Linf_errors(m,p,lamb,para,i) = s.Linf_error;
-                    AUC_errors(m,p,lamb,para,i) = s.AUC_error;
-                    peak_time_errors(m,p,lamb,para,i) = s.peak_time_error;
-                    peak_height_errors(m,p,lamb,para,i) = s.peak_height_error;
-                    actual_errors{m,p,lamb,para,i} = s.actual_error;
-                    full_deconvolved_BrACs{m,p,lamb,para,i} = s.full_deconvolved_BrAC;
-                    trained_parameters{m,p,lamb,para,i} = s.trained_parameters;
+                    L2_errors(m,p,lamb,para,ii) = s.L2_error;
+                    Linf_errors(m,p,lamb,para,ii) = s.Linf_error;
+                    AUC_errors(m,p,lamb,para,ii) = s.AUC_error;
+                    peak_time_errors(m,p,lamb,para,ii) = s.peak_time_error;
+                    peak_height_errors(m,p,lamb,para,ii) = s.peak_height_error;
+                    actual_errors{m,p,lamb,para,ii} = s.actual_error;
+                    full_deconvolved_BrACs{m,p,lamb,para,ii} = s.full_deconvolved_BrAC;
+                    trained_parameters{m,p,lamb,para,ii} = s.trained_parameters;
                 end
             end
         end

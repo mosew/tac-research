@@ -15,10 +15,10 @@ reprocess_data
 % M, P, lambda, test paradigm, test episode
 
 Ms=[0];
-Ps=[40,60,80]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
+Ps=[40]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
 lambdas=[0.1];
-paradigms =[3,5,6];
-testeps=1:9;
+paradigms =[7:10];
+testeps=1:5;
 
 %% Define cell array to hold test data
 fprintf('Creating empty cell array\n')
@@ -77,6 +77,18 @@ for j = 1:length(testeps)
             else
                 training = [(i+1):min(i+3,9),1:(i+3-9)];
             end
+        end
+        if para == 7
+            training = 6;
+        end
+        if para == 8
+            training = 6:7;
+        end
+        if para == 9
+            training = 6:8;
+        end
+        if para == 10
+            training = 6:9;
         end
         
         
@@ -146,4 +158,4 @@ for j = 1:length(testeps)
     end
 end
 fprintf('Saving test results cell array\n')
-save('022717_234_splhr.mat','b')
+save('030117_2splhr_fixedtraining_testeps15.mat','b')

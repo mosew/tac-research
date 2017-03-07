@@ -18,7 +18,7 @@ data_BrAC_5122{8} = [0,32,data_BrAC_5122{8}(2:end)']';
 % should be 22, for some reason.
 
 %% Pad pads the beginning of each episode with 5*pad minutes of zeros
-pad = 6;
+pad = 6; %This value of pad=6 appears hard-coded elsewhere...
 cutoff = 2;
 
 data_TAC_5122 = cell(1,11);

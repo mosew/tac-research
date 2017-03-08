@@ -1,3 +1,3 @@
-function prior = qprior(q)
-    prior = normpdf(q,.0046, 6e-4);
+function prior = thetaprior(theta)
+    prior = normpdf(theta,.0046, 6e-4);
 end

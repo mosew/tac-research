@@ -38,11 +38,13 @@ actual_u = actual_u + normrnd(0,.05*actual_u);
 % plot(actual_u,'o')
 
 %% Generate parameter variance estimates NOT IMPLEMENTED
+
 % Each of these should give arrays of size nParams x 1
 alph=get_alpha_vel(); % Ordinary array
-Vhat=Vhat(); % Cell array of matrices
+Vhat=Vhat(); % Cell array of matrices, one for each parameter.
 
 %% MCMC
+
 k=1;
 while ~converged() %CONVERGENCE CONDITION NOT IMPLEMENTED
     k=k+1;

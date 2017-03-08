@@ -1,6 +1,6 @@
 function Vy_given_theta_u = Vy_given_theta_u(data_path)
     
-    load(data_path,'actual_errors','u_totals')
+    load(data_path,'actual_errors','u_total')
     % HERE is where to tweak parameters such as number of training episodes
     a = cell2mat(actual_errors(1,1,1,1,:));
     

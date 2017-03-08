@@ -11,13 +11,13 @@ function EV = EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T)
     % matrix V
     
     [eivs,eifs]=get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
-    Vy_given_theta=Vy_given_theta(theta,T,P);
+    Vy_given_theta=Vy_given_theta(theta,T,P,rkhs_eigenfile);
     
-    M=length(y);
     
+    n=length(y);
     
     % Not sure about the time vector on this one.
-    LMatrix=sample_eigenfunctions(eifs,0:(M-1),P);
+    LMatrix=sample_eigenfunctions(eifs,0:1/(n-1):T,P);
     
     EV = cell(1,2);
     EV{1} = diag(eivs)*LMatrix'*Vy_given_theta\y;

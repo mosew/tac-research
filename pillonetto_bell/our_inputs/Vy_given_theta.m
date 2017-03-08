@@ -1,8 +1,11 @@
-function Vy_given_theta = Vy_given_theta(theta,T,P)
+function Vy_given_theta = Vy_given_theta(theta,T,P,rkhs_eigenfile)
     % INPUTS:
-    % theta is our parameter vector
-    % T is the total length of an episode, in minutes
+    % theta is a vector of parameters
+    % T is the total length of an episode (in minutes?)
     % P is number of eigenfunctions to use
+    %
+    % OUTPUTS:
+    % n x n matrix, where n = length(y) = T/tau
     
     data_path = '022717_234_splhr_arrays.mat';
     
@@ -16,7 +19,7 @@ function Vy_given_theta = Vy_given_theta(theta,T,P)
     t = 0:tau:T;
     
     % RKHS dependence
-    [eivs,eifs] = get_kernel_eigenstuff(theta,P,T,'green2_eigen');
+    [eivs,eifs] = get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
     sampled_eifs = sample_eigenfunctions(eifs,t,P);
     
     % Data dependence
@@ -36,6 +39,6 @@ function Vy_given_theta = Vy_given_theta(theta,T,P)
         end
     end
     
-    % Doesn't come out right. Maybe the episodes are too long?
+    % Doesn't come out right? Maybe the episodes are too long?
     
 end

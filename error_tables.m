@@ -1,13 +1,13 @@
 %% Make tables to compare my data to Gary's
 global u_total tau y_total
 
-%% Now compute error for Gary's
+%% Compute error for Gary's
 
 % Change directory to his
 cd('C:\Users\mose\Dropbox\research\Filter Design MW')
 
-% Set episode to train filter on
-train = 7;
+% Set episode to train filter on. Note train=7 corresponds to our ep.6.
+train = 8;
 
 % Load optimal parameters for filter training episode
 q_1_in=eval(sprintf('alpha_5122_%i',train));
@@ -38,6 +38,7 @@ TAC = [(0:(n-1))/(60/tau); y_total(train,:)]';
 G_actual_error=cell(5,1);
 G_peak_height_error=zeros(5,1);
 G_peak_time_error=zeros(5,1);
+G_AUC_error=zeros(5,1);
 
 nis = zeros(5,1);
 
@@ -58,11 +59,12 @@ for test = 1:6
 
     n=240;
     
-    % Get sampled BrAC test data
-    BrAC_test=[(0:(n-1))/(60/tau); u_total(ti,:)]';
+    t=(0:(n-1))/(60/tau);
+    % Get sampled BrAC test data. First column is time vector, second is data
+    BrAC_test=[t; u_total(ti,:)]';
     
     % Get sampled TAC test data // maybe use y_total here
-    TAC_test=[(0:(n-1))/(60/tau);y_total(ti,:)]';
+    TAC_test=[t;y_total(ti,:)]';
 
     % Get Gary's estimated time,BrAC,TAC
     rosen_tBT = BrAC_Est_0_G_1_FD(TAC_test,r1_r2_h);
@@ -70,7 +72,7 @@ for test = 1:6
     % Extract Gary's estimated BrAC
     u_star = rosen_tBT(:,2);
     
-    % Get processed (i.e. de-noised and possibly zero-padded) BrAC signal
+    % Get preprocessed (i.e. de-noised and possibly zero-padded) BrAC signal
     test_u = u_total(ti,:);
     
     % Get data about peak time and height
@@ -85,23 +87,25 @@ for test = 1:6
     
     % Get error measures for current test episode
     G_actual_error{ti} = (rosen_tBT(1:5:(5*nis(ti)),2)-u_total(ti,1:nis(ti))');
-    G_peak_time_error(ti) = 5*(peaktime_est-peaktime_act);
+    G_peak_time_error(ti) = (peaktime_est-peaktime_act*5);
     G_peak_height_error(ti) = peak_est-peak_act;
+    G_AUC_error(ti) = sum(rosen_tBT(1:(5*nis(ti)),2))-sum(u_total(ti,1:nis(ti))')*5;
     
     % Plot
     figure
+    % Plot Gary's estimated BrAC
     plot(60*rosen_tBT(1:5:(5*nis(ti)),1),rosen_tBT(1:5:(5*nis(ti)),2))
     hold on
+    
+    % Plot actual BrAC
     plot(1:5:(5*nis(ti)),u_total(ti,1:nis(ti)))
+    
+    % Plot my estimated BrAC
+    ust=cell2mat(full_deconvolved_BrACs(1,1,1,1,ti));
+    plot(1:5:(5*nis(ti)),ust(1:nis(ti)))
 end
 
-G_L2_MSE = mean(cell2mat(G_actual_error').^2);
-G_L2_MSE_sd = std(cell2mat(G_actual_error).^2,0,1);
-G_peak_time_MSE = mean(G_peak_time_error.^2);
-G_peak_time_MSE_sd = std(G_peak_time_error.^2,0,1);
-G_peak_height_MSE = mean(G_peak_height_error.^2);
-G_peak_height_MSE_sd = std(G_peak_height_error.^2,0,1);
-
+G_L2_MSE = mean(cell2mat(G_actual_error').^2)';
 %% Then me
 % Load my own data
 load('030117_234splhr_fixedtraining_testeps15_arrays')
@@ -109,33 +113,27 @@ load('030117_234splhr_fixedtraining_testeps15_arrays')
 n=200;
 
 actual_errors = permute(actual_errors,[2,4,5,1,3]);
+peak_height_errors = permute(peak_height_errors,[2,4,5,1,3]);
+peak_time_errors = permute(peak_time_errors,[2,4,5,1,3]);
+AUC_errors = permute(AUC_errors,[2,4,5,1,3]);
 % 2 spl/hr
 actual_errors = permute(actual_errors(1,:,:),[2,3,1]);
-
-
-% Arrange computed MSE across the test episodes 1:5 (except 3 and 9 remembeR)
-% L2_MSE = permute(L2_MSE,[2,4,1,3]);
-% L2_MSE_sd = permute(L2_MSE_sd,[2,4,1,3]);
-peak_height_MSE = permute(peak_height_MSE,[2,4,1,3]);
-peak_height_MSE_sd = permute(peak_height_MSE_sd,[2,4,1,3]);
-peak_time_MSE = permute(peak_time_MSE,[2,4,1,3]);
-peak_time_MSE_sd = permute(peak_time_MSE_sd,[2,4,1,3]);
+peak_height_errors = permute(peak_height_errors(1,:,:),[2,3,1]);
+peak_time_errors=permute(peak_time_errors(1,:,:),[2,3,1]);
+AUC_errors = permute(AUC_errors(1,:,:),[2,3,1]);
 
 
 % We just want 2 splines per hour
-% L2_MSE = permute(L2_MSE(1,:),[2,1]);
-% L2_MSE_sd = permute(L2_MSE_sd(1,:),[2,1]);
-peak_height_MSE = permute(peak_height_MSE(1,:),[2,1]);
-peak_height_MSE_sd = permute(peak_height_MSE_sd(1,:),[2,1]);
-peak_time_MSE = permute(peak_time_MSE(1,:),[2,1]);
-peak_time_MSE_sd = permute(peak_time_MSE_sd(1,:),[2,1]);
 
-
+% Just one single training episode, episode 6, hence the (1,:)
 L2_errors = cell2mat(actual_errors(1,:)').^2;
+
+% Compute mean L2 error for each episode, restricted to first 200 timesteps
+% to avoid weird overshoot artifacts.
 L2_MSE = mean(L2_errors(:,1:200),2);
-L2_MSE_sd = std(L2_errors(:,1:200),0,2);
 
-
-[G_L2_MSE',L2_MSE]
-[G_peak_height_MSE,G_peak_height_MSE_sd;peak_height_MSE,peak_height_MSE_sd]
-[G_peak_time_MSE,G_peak_time_MSE_sd;peak_time_MSE,peak_time_MSE_sd]
+% [G_L2_MSE,L2_MSE]
+% [G_peak_height_error,peak_height_errors(1,:)']
+% [G_peak_time_error,peak_time_errors(1,:)']
+% [G_AUC_error,AUC_errors(1,:)']
+[G_L2_MSE,L2_MSE,G_peak_height_error,peak_height_errors(1,:)',G_peak_time_error,peak_time_errors(1,:)',G_AUC_error,AUC_errors(1,:)']

@@ -1,6 +1,6 @@
 function Vy_given_qu = Vy_given_qu(data_path)
     
-    load(data_path,'actual_errors','u_total')
+    load(data_path,'actual_errors','u_totals')
     % HERE is where to tweak parameters such as number of training episodes
     a = cell2mat(actual_errors(1,1,1,1,:));
     

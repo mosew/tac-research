@@ -3,6 +3,9 @@
 %% Set seed
 rng(2);
 
+%% Set RKHS
+rkhs_eigenfile = 'greenkernel1';
+
 %% Generate initial parameter data
 
 % number of parameters
@@ -17,6 +20,10 @@ params=zeros(nParams,K);
 % Initial parameter guesses
 params(1,1)= 1;
 params(2,1)= 10;
+
+
+% initialize empty arrays to hold amplitudes
+a = zeros(P,K);
 
 
 
@@ -37,7 +44,7 @@ Vhat=Vhat(); % Cell array of matrices
 
 %% MCMC
 k=1;
-while ~converged()
+while ~converged() %CONVERGENCE CONDITION NOT IMPLEMENTED
     k=k+1;
         
     c = unifrnd(0,1,nParams,1); % Generates a value for each parameter
@@ -49,6 +56,7 @@ while ~converged()
         end
     end
     
-    EV=EV_aP_given_theta_y(theta,y,rk
+    EV=EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T);
     
+    a(:,k) = normrnd(EV{1},EV{2});
 end

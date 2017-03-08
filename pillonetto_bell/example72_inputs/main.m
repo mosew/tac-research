@@ -3,6 +3,9 @@
 %% Set seed
 rng(2);
 
+%% Set RKHS
+rkhs_eigenfile = 'greenkernel1';
+
 %% Generate initial parameter data
 
 % number of parameters
@@ -49,6 +52,6 @@ while ~converged()
         end
     end
     
-    E_aP_given_qK_y = 
+    EV=EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T);
     
 end

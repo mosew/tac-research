@@ -1,0 +1,10 @@
+function bool = isPbigenough(fkCoarse,fkFine,T)
+    % fkCoarse and fkT
+    e = 0.02;
+%    gamma = 1.25;
+    
+    lumC=confidence_limits(fkCoarse);
+    lumF=confidence_limits(fkFine);        
+    
+    bool = condition(e,T,lumF,lumC,1) && condition(e,T,lumF,lumC,2) && condition(e,T,lumF,lumC,3);
+end

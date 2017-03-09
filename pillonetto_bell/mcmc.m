@@ -45,8 +45,11 @@ Vhat=Vhat(); % Cell array of matrices, one for each parameter.
 
 %% MCMC
 
+epsilon = .001;
+nEndingSteps=3;
+
 k=1;
-while ~converged() %CONVERGENCE CONDITION NOT IMPLEMENTED
+while ~converged(a,k,nEndingSteps,epsilon) %CONVERGENCE CONDITION NOT IMPLEMENTED
     k=k+1;
         
     c = unifrnd(0,1,nParams,1); % Generates a value for each parameter

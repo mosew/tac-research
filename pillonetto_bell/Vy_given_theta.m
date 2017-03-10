@@ -1,16 +1,18 @@
-function Vy_given_theta = Vy_given_theta(theta,T,P,rkhs_eigenfile,data_path)
+function Vy_given_theta = Vy_given_theta(theta,tau,T,P,rkhs_eigenfile,data_path)
     % INPUTS:
     % theta is a vector of parameters
     % T is the total length of an episode (in minutes?)
     % P is number of eigenfunctions to use
+    % rkhs_eigenfile is a file 1x2 cell array output
     %
     % OUTPUTS:
     % n x n matrix, where n = length(y) = T/tau
     
+    t = 0:tau:T;
         
     % RKHS dependence
     [eivs,eifs] = get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
-    sampled_eifs = sample_eigenfunctions(eifs,t,P);
+    sampled_eifs = sample_eigenfunctions(eifs,t);
     
     % Data dependence
     meas_noise = Vy_given_theta_u(data_path);

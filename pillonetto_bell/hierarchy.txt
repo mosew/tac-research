@@ -1,0 +1,32 @@
+Dependencies
+
+Vy_given_theta
+	get_kernel_eigenstuff
+		rkhs_eigenfile
+	sample_eigenfunctions
+	Vy_given_theta_u NOT IMPLEMENTED
+	convolve_sample_eifs
+		L_current_a
+			fk_from_a_efs
+
+mcmc
+	example_u
+	get_alpha_vel NOT IMPLEMENTED
+	Vhat
+		Vy_given_theta
+	converged
+	acceptance
+		p_y_given_theta
+			Vy_given_theta
+		thetaprior NOT IMPLEMENTED
+	EV_aP_given_theta_y
+		get_kernel_eigenstuff
+		Vy_given_theta
+		sample_eigenfunctions
+	
+isPbigenough NOT IMPLMENTED
+	mcmc
+	confidence_limits
+	condition
+	
+RKHS stuff

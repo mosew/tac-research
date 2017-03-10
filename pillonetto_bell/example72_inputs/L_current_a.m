@@ -1,15 +1,15 @@
-function output = L(theta,a,efs,T)
+function output = L_current_a(theta,a,efs,T)
     % I THINK IT'S BROKEN?
     % INPUTS:
     % theta is a vector of parameters
-    % a,efs corresponds to the input signal to L:
+    %   This is for example 7.2
+    %       theta(1) and theta(2)
+    % (a,efs) are 1xP (number,cell) arrays corresponds to the input signal to L:
     %       u(t) = a.*efs(t)
     % T is the max time.
 
-
     % efs is a cell array of P eigenfunctions
     % a is a 1-row array of P coefficients
-    % th is a number.
         
     f = fk_from_a_efs(a,efs);
     

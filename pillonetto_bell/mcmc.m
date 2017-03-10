@@ -1,5 +1,3 @@
-% main
-
 %% Set seed
 rng(2);
 

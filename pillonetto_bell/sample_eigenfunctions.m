@@ -1,4 +1,4 @@
-function sampled_eifs = sample_eigenfunctions(eifs,t,P)
+function sampled_eifs = sample_eigenfunctions(eifs,t)
     % INPUTS:
     % eifs is a 1xP cell array of function handles containing the eigenfunctions of the RK
     % t is a vector of values to sample each eigenfunction with

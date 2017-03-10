@@ -37,14 +37,15 @@ actual_u = pb_7p2_example_u(0:1/49:1) ;
 actual_u = actual_u + normrnd(0,.05*actual_u);
 % plot(actual_u,'o')
 
-%% Generate parameter variance estimates NOT IMPLEMENTED
+%% Generate parameter variance estimates 
 
 % Each of these should give arrays of size nParams x 1
-alph=get_alpha_vel(); % Ordinary array
-Vhat=Vhat(); % Cell array of matrices, one for each parameter.
+alph=get_alpha_vel(); % Ordinary array NOT IMPLEMENTED
+Vhat=Vhat(2); % Cell array of matrices, one for each parameter.
 
 %% MCMC
 
+% These are parameters for the convergence condition.
 epsilon = .001;
 nEndingSteps=3;
 
@@ -52,7 +53,7 @@ k=1;
 while ~converged(a,k,nEndingSteps,epsilon) %CONVERGENCE CONDITION NOT IMPLEMENTED
     k=k+1;
         
-    c = unifrnd(0,1,nParams,1); % Generates a value for each parameter
+    c = unifrnd(0,1,nParams,1); % Generates a uniform random number for each parameter
     
     for i=1:nParams
         params(i,k)=normrnd(params(i,k-1),alph(i)*Vhat(i));

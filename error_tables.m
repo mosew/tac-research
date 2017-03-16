@@ -7,7 +7,7 @@ global u_total tau y_total
 cd('C:\Users\mose\Dropbox\research\Filter Design MW')
 
 % Set episode to train filter on. Note train=7 corresponds to our ep.6.
-train = 8;
+train = 7;
 
 % Load optimal parameters for filter training episode
 q_1_in=eval(sprintf('alpha_5122_%i',train));
@@ -63,7 +63,7 @@ for test = 1:6
     % Get sampled BrAC test data. First column is time vector, second is data
     BrAC_test=[t; u_total(ti,:)]';
     
-    % Get sampled TAC test data // maybe use y_total here
+    % Get sampled (processed) TAC test data
     TAC_test=[t;y_total(ti,:)]';
 
     % Get Gary's estimated time,BrAC,TAC
@@ -105,10 +105,11 @@ for test = 1:6
     plot(1:5:(5*nis(ti)),ust(1:nis(ti)))
 end
 
-G_L2_MSE = mean(cell2mat(G_actual_error').^2)';
+G_L2_MSE = sum(cell2mat(G_actual_error').^2)';
 %% Then me
 % Load my own data
-load('030117_234splhr_fixedtraining_testeps15_arrays')
+cd('C:\Users\mose\Dropbox\research\matlab\me')
+load('030117_2splhr_fixedtraining_testeps15_arrays')
 
 n=200;
 
@@ -128,12 +129,18 @@ AUC_errors = permute(AUC_errors(1,:,:),[2,3,1]);
 % Just one single training episode, episode 6, hence the (1,:)
 L2_errors = cell2mat(actual_errors(1,:)').^2;
 
-% Compute mean L2 error for each episode, restricted to first 200 timesteps
-% to avoid weird overshoot artifacts.
-L2_MSE = mean(L2_errors(:,1:200),2);
+% Compute mean L2 error for each episode
+L2_MSE = mean(L2_errors(:,1:240),1);
 
 % [G_L2_MSE,L2_MSE]
 % [G_peak_height_error,peak_height_errors(1,:)']
 % [G_peak_time_error,peak_time_errors(1,:)']
 % [G_AUC_error,AUC_errors(1,:)']
-[G_L2_MSE,L2_MSE,G_peak_height_error,peak_height_errors(1,:)',G_peak_time_error,peak_time_errors(1,:)',G_AUC_error,AUC_errors(1,:)']
+%[G_L2_MSE,L2_MSE,G_peak_height_error,peak_height_errors(1,:)',G_peak_time_error,peak_time_errors(1,:)',G_AUC_error,AUC_errors(1,:)'];
+
+
+
+G_peak_height_MSE=mean(G_peak_height_error.^2)
+G_peak_time_MSE=mean(G_peak_time_error.^2)
+G_AUC_MSE = mean(G_AUC_error.^2)
+mean(G_L2_MSE)

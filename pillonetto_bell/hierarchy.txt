@@ -1,24 +1,34 @@
-Dependencies
+Dependencies and tests
+
+x: runs
+o: quantities tested
+--: covered elsewhere
+
+
+
 
 Vy_given_theta
-	get_kernel_eigenstuff
-		rkhs_eigenfile
-	sample_eigenfunctions
-	Vy_given_theta_u NOT IMPLEMENTED
-	convolve_sample_eifs
-		L_current_a
-			fk_from_a_efs
+	get_kernel_eigenstuff x
+		rkhs_eigenfile -- 
+	sample_eigenfunctions x
+	Vy_given_theta_u x
+	convolve_eifs x
+		L_i x
+			fk_from_a_efs x
 
+			
 mcmc
-	example_u
+	example_u x
 	get_alpha_vel NOT IMPLEMENTED
-	Vhat
+	Vhat 
 		Vy_given_theta
+		dVy_given_theta_dtheta
+		ddVy_given_theta_ddtheta
 	converged
 	acceptance
 		p_y_given_theta
 			Vy_given_theta
-		thetaprior NOT IMPLEMENTED
+		thetaprior
 	EV_aP_given_theta_y
 		get_kernel_eigenstuff
 		Vy_given_theta
@@ -29,4 +39,6 @@ isPbigenough NOT IMPLMENTED
 	confidence_limits
 	condition
 	
-RKHS stuff
+rkhs stuff
+	green1_kernel x
+	green2_kernel

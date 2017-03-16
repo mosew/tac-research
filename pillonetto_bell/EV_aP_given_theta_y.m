@@ -10,7 +10,7 @@ function EV = EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T)
     % EV is a cell array with 2 elements. First is a vector E, second a matrix V
     
     [eivs,eifs]=get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
-    Vy_given_theta=Vy_given_theta(theta,T,P,rkhs_eigenfile);
+    Vyth=Vy_given_theta(theta,T,P,rkhs_eigenfile);
     
     
     n=length(y);
@@ -19,7 +19,7 @@ function EV = EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T)
     LMatrix=sample_eigenfunctions(eifs,0:1/(n-1):T,P);
     
     EV = cell(1,2);
-    EV{1} = diag(eivs)*LMatrix'*Vy_given_theta\y;
-    EV{2} = diag(eivs)-diag(eivs)*LMatrix'*Vy_given_theta\LMatrix*diag(eivs);
+    EV{1} = diag(eivs)*LMatrix'*Vyth\y;
+    EV{2} = diag(eivs)-diag(eivs)*LMatrix'*Vyth\LMatrix*diag(eivs);
     
 end

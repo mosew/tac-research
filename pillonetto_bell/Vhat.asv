@@ -1,0 +1,28 @@
+function Vhat = Vhat(theta,tau,T,P,n,rkhs_eigenfile,data_path)
+    % This should compute a cell array, where each cell contains
+    % the Cramer-Rao lower bound for our estimates of parameter i
+    %
+    % nTheta is the number of parameters
+    % y is the output signal
+    
+    nTheta = length(theta);
+    
+    Vy_th=Vy_given_theta(theta,tau,T,P,rkhs_eigenfile,data_path);
+    Vy_thu=Vy_given_theta_u(theta,n);
+    dVy_given_theta_dtheta = dVy_given_theta_dth(theta,n,Vy_th,Vy_thu);
+    ddVy_given_theta_dtheta2 = 
+    
+    info = zeros(nTheta);
+    
+    for i=1:nTheta
+        for j=1:i
+            info(i,j) = 1/2 *trace(Vy_th\cell2mat(dVy_given_theta_dtheta(i)) * Vy_th\cell2mat(dVy_given_theta_dtheta(j)));
+            if i~=j
+                info(j,i) = info(i,j);
+            end
+        end
+    end
+    
+    Vhat = inv(info);
+    
+end

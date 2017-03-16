@@ -1,22 +1,20 @@
-function Vhat = Vhat(a)
-    % This should compute the Cramer-Rao lower bound for our estimates of
-    % EACH INDIVIDUAL PARAMETER
+function Vhat = Vhat(theta,tau,P,T,n,rkhs_eigenfile,data_path)
+    % This should compute a cell array, where each cell contains
+    % the Cramer-Rao lower bound for our estimates of parameter i
     %
-    % a is the number of parameters
+    % nTheta is the number of parameters
     % y is the output signal
     
-    Vyth=Vy_given_theta;
+    nTheta = length(theta);
     
-    info = zeros(a);
+    Lmatrix_ = Lmatrix(theta,P,T,rkhs_eigenfile,n,tau);
+    Vy_th_=Vy_th(theta,tau,T,P,rkhs_eigenfile,data_path);
+    Vy_thu_=Vy_thu(theta,n);
+    dVy_th_ = dVy_th(theta,P,T,n,rkhs_eigs,Lmatrix_);
+    d2Vy_th_ = d2Vy_th(theta,n,Vy_th_,Vy_thu_);
     
-    for i=1:a
-        for j=1:i
-            info(i,j) = 1/2 *trace(Vyth\dVy_given_theta_dth(i) * Vyth\dVy_given_theta_dth(j));
-            if i~=j
-                info(j,i) = info(i,j);
-            end
-        end
-    end    
+    info = zeros(nTheta);
+    
     
     Vhat = inv(info);
     

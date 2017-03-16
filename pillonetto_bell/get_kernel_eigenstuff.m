@@ -9,10 +9,11 @@ function [eivs,eifs]=get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile)
     % eivs is a 1xP array of the eigenvalues of the RK
     % eifs is a 1xP cell array of handles of eigenfunctions of the RK
     
-    eivs = zeros(1,P); %numbers
-    eifs = cell(1,P); %functions of t
+    eivs = zeros(P,1); %numbers
+    eifs = cell(P,1); %functions of t
     
     for j=1:P
         [eivs(j),eifs{j}] = feval(rkhs_eigenfile,j,theta,T);
     end
+    
 end

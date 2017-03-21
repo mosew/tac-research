@@ -11,7 +11,7 @@ function d2Vy_thu = d2Vy_thu(theta,P,n)
     % In other words, V(y|theta,u) does not depend on theta.
 
     nTheta = length(theta);
-    d2Vy_thu = zeros(n,n,nTheta);     
+    d2Vy_thu = zeros(n,n,nTheta,nTheta);     
     
     
     

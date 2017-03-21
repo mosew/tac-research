@@ -1,4 +1,4 @@
-function dVy_th = dVy_th(theta,P,T,n,rkhs_eigs,Lmatrix)
+function dVy_th = dVy_th(theta,P,T,n,eivs,Lmatrix)
     % OUTPUT:
     % 3D matrix
     % n x n x nTheta
@@ -16,7 +16,7 @@ function dVy_th = dVy_th(theta,P,T,n,rkhs_eigs,Lmatrix)
     for i = 1:n
         for k = 1:n
             for r = 1:nTheta
-                dVy_th(i,k,r) = sum( deiv_(:,r).*Lmatrix(:,i).*Lmatrix(:,k) + rkhs_eigs.*(dLmatrix_(:,i,r).*Lmatrix(:,k)+Lmatrix(:,i).*dLmatrix_(:,k,r))) ;
+                dVy_th(i,k,r) = sum( deiv_(:,r).*Lmatrix(:,i).*Lmatrix(:,k) + eivs.*(dLmatrix_(:,i,r).*Lmatrix(:,k)+Lmatrix(:,i).*dLmatrix_(:,k,r))) ;
             end
         end
     end

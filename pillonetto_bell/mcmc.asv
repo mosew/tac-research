@@ -3,15 +3,12 @@ rng(2);
 
 %% Set RKHS
 rkhs_eigenfile = 'green1_eigen';
-data_path = 'none';
-% data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
+data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
 P = 30;   %number of eigenfunctions
 T = 1;
-n = 50;
-tau = 1/49;
-t = 0:tau:T;
+n=50;
 
 
 %% Generate initial theta
@@ -20,7 +17,7 @@ t = 0:tau:T;
 nTheta=2;
 
 % initial guess for number of iterations
-K=25;
+K=300;
 
 % initialize empty arrays to hold parameter values
 thetas=zeros(nTheta,K);
@@ -38,31 +35,30 @@ a = zeros(P,K);
 
 
 %% Generate sample input
-% Base signal plus noise
+% Base signal
 actual_u = pb_7p2_example_u() ;
-sampled_u = actual_u(t);
 
-plot(t,sampled_u);
+% Plus noise
+actual_u = @(s) feval(actual_u,s) + normrnd(0,.05*feval(actual_u,s));
+tau = 1/49;
 
 
 %% Generate sample output
-y = zeros(1,n);
-fprintf('Generating sample output y')
-y(1)=0;
-for i = 1:(n-1)
-    y(i+1) = L_i([5,9.22],actual_u,i,tau);
+y = zeros(1,50);
+for i = 1:50
+    y(i) = L_i([5,9.22],actual_u,i,tau);
 end
 
 %% Generate parameter variance estimates 
 
-alph=.02;
+alph=1;
 Vhat_ = Vhat(y,[5,10],tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 % Cell array of matrices, one for each parameter.
 
 %% MCMC
 
 % These are parameters for the convergence condition.
-epsilon = 10^(-3);
+epsilon = .001;
 nEndingSteps=3;
 
 k=1;
@@ -76,25 +72,15 @@ while ~converged(a,k,nEndingSteps,epsilon) %CONVERGENCE CONDITION NOT IMPLEMENTE
     for i=1:nTheta
         thetas(i,k)=normrnd(thetas(i,k-1),alph*Vhat_(i));
     end
-    
-    acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
-    
-    for i = 1:nTheta
-        if c(i) > acc(i)
+        if c(i) > acceptance(i,thetas(i,k),thetas(i,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path)
             rejected = rejected + 1;
             thetas(i,k)=thetas(i,k-1);
         end
     end
-
     
-    EV=EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T,n,tau,data_path);
+    EV=EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T);
     
-    mus = EV{1};
-    covs = EV{2};
-    
-    for i = 1:nTheta
-        a(i,k) = normrnd(mus(i),sqrt(covs(i,i)));
-    end
+    a(:,k) = normrnd(EV{1},EV{2})
 end
 
 rejected/k

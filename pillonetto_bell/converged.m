@@ -8,6 +8,6 @@ function bool = converged(a,k,nEndingSteps,epsilon)
     else
         % This condition returns true only if the amplitude guesses changed
         % by less than epsilon the previous nEndingSteps iterations
-        bool=max(abs(diff(a(:,k:-1:(k-nEndingSteps)),2)))<epsilon;
+        bool=max(abs(diff(a(:,(k+1):-1:(k-nEndingSteps+1)),2)))<epsilon;
     end
 end

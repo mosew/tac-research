@@ -1,4 +1,4 @@
-function Vy_th = Vy_th(theta,tau,T,P,rkhs_eigenfile,data_path)
+function Vy_th = Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path)
     % INPUTS:
     % theta is a vector of parameters
     % T is the total length of an episode (in minutes?)
@@ -8,16 +8,20 @@ function Vy_th = Vy_th(theta,tau,T,P,rkhs_eigenfile,data_path)
     %
     % OUTPUTS:
     % Vy_given_theta is an n x n matrix, where n = length(y) = T/tau
-    
-    n=T/tau;    
-    
+        
     % RKHS dependence
     [eivs,eifs] = get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
     convolved_eifs = convolve_eifs(eifs,theta,P,n,tau);
 
     % Data dependence
-    load(data_path,'u_total');
-    meas_noise = Vy_thu(theta,n);
+    if data_path == 'none'
+        u = pb_7p2_example_u();
+        u = u(0:tau:T);
+        meas_noise = Vy_thu(theta,n,u);
+    else
+        load(data_path,'u_total');
+        meas_noise = Vy_thu(theta,n,u_total);
+    end
     
        
     Vy_th = zeros(n);

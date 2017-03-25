@@ -1,4 +1,4 @@
-function [eivs,eifs]=get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile)
+function [eivs,eifs]=get_kernel_eigenstuff(P,T,rkhs_eigenfile)
     % INPUTS:
     % theta is a vector of parameters (which is only relevant here if the eigenvalues depend on theta)
     % P is the number of eigenfunctions to use
@@ -9,11 +9,11 @@ function [eivs,eifs]=get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile)
     % eivs is a 1xP array of the eigenvalues of the RK
     % eifs is a 1xP cell array of handles of eigenfunctions of the RK
     
-    eivs = zeros(P,1); %numbers
+    eivs = cell(P,1); %functions of theta
     eifs = cell(P,1); %functions of t
     
     for j=1:P
-        [eivs(j),eifs{j}] = feval(rkhs_eigenfile,j,theta,T);
+        [eivs{j},eifs{j}] = feval(rkhs_eigenfile,j,T);
     end
     
 end

@@ -7,7 +7,11 @@ function p_theta = p_theta(i,theta)
             % flat/logarithmic prior
             % In this case it's OK because for MCMC we only need to find a
             % function proportional to a pdf.
-            p_theta=log(theta(1));
+            if theta(1)<=0
+                p_theta = 0;
+            else
+                p_theta=log(theta(1));
+            end
         case 2
             p_theta=normpdf(theta(2),10,2);
     end

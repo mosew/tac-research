@@ -5,6 +5,8 @@ function dVy_th = dVy_th(theta,P,T,n,eivs,Lmatrix)
     % 
     % dVy_th(i,k,r) =  ( dV(y|th)/dth_r )_ik
     
+    eivs = evaluate_eivs(eivs,theta);
+    
     nTheta = length(theta);
     
     deiv_ = deiv(theta,P,T);

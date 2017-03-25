@@ -14,7 +14,7 @@ function output = L_i(theta,f,i,tau)
     try
         fxg = @(s) feval(f,s).*feval(g,i*tau-s);
     catch
-        fxg = @(s) f.*feval(g,i-fix(s/tau));
+        fxg = @(s) f.*feval(g,i*tau-s);
     end
     output = integral(fxg,0,i*tau);
 end

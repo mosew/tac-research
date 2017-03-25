@@ -9,7 +9,8 @@ function EV = EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T,n,tau,data_path)
     % OUTPUTs:
     % EV is a cell array with 2 elements. First is a vector E, second a matrix V
     
-    [eivs,eifs]=get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
+    [eivs,~]=get_kernel_eigenstuff(P,T,rkhs_eigenfile);
+    eivs = evaluate_eivs(eivs,theta);
     Vy_th_=Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path);
     
         

@@ -10,7 +10,7 @@ function Vy_th = Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path)
     % Vy_given_theta is an n x n matrix, where n = length(y) = T/tau
         
     % RKHS dependence
-    [eivs,eifs] = get_kernel_eigenstuff(theta,P,T,rkhs_eigenfile);
+    [eivs,eifs] = get_kernel_eigenstuff(P,T,rkhs_eigenfile);
     convolved_eifs = convolve_eifs(eifs,theta,P,n,tau);
 
     % Data dependence
@@ -26,9 +26,14 @@ function Vy_th = Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path)
        
     Vy_th = zeros(n);
     
+    eivs = evaluate_eivs(eivs,theta);
+    
     for i=1:(n)
-        for k=1:(n)
-            Vy_th(i,k) = sum(eivs'*convolved_eifs(:,i).*convolved_eifs(:,k)) + meas_noise(i,k);
+        for k=1:i
+            Vy_th(i,k) = sum(eivs.*convolved_eifs(:,i).*convolved_eifs(:,k)) + meas_noise(i,k);
+            if i~=k
+                Vy_th(k,i) = Vy_th(i,k);
+            end
         end
     end
     

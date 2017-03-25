@@ -3,6 +3,7 @@ function d2Vy_th = d2Vy_th(theta,P,T,n,eivs,Lmatrix,dLmatrix)
     % OUTPUT:
     % n x n x nTheta x nTheta
 
+    eivs = evaluate_eivs(eivs,theta);
     
     nTheta=length(theta);
     

@@ -12,6 +12,7 @@ function dVy_th = dVy_th(theta,P,T,n,eivs,Lmatrix)
     deiv_ = deiv(theta,P,T);
         
     dLmatrix_=dLmatrix(theta,P,n,Lmatrix);
+    dVy_thu_ = dVy_thu(theta,P,n);
     
     dVy_th = zeros(n,n,nTheta);
     

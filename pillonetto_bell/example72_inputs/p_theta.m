@@ -5,7 +5,7 @@ function p_theta = p_theta(i,theta)
         case 1
             % p_theta = p_y_given_theta(y,theta,tau,T,P,rkhs_eigenfile,data_path);
             % flat/logarithmic prior
-            % In this case it's OK because for MCMC we only need to find a
+            % In this case it's OK(?) because for MCMC we only need to find a
             % function proportional to a pdf.
             if theta(1)<=0
                 p_theta = 0;

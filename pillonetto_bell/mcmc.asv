@@ -7,14 +7,12 @@ data_path = 'none';
 % data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
-P = 9;   %number of eigenfunctions
+P = 12;   %number of eigenfunctions
 T = 1;
 n = 50;
 tau = 1/50;
 t = 0:tau:(T-tau);
-burnoff = 60;
-K = 300;
-alph=200; % Adjusts the variance of the parameter estimate
+burnout = 10;
 
 
 %% Generate initial theta
@@ -22,12 +20,14 @@ alph=200; % Adjusts the variance of the parameter estimate
 % number of parameters
 nTheta=2;
 
+% initial guess for number of iterations
+K=100;
 % initialize empty arrays to hold parameter values
-thetas=zeros(nTheta,K-burnoff);
+thetas=zeros(nTheta,K);
 
 % Initial parameter guesses
 thetas(1,1)= 1;
-thetas(2,1)= 10;
+thetas(2,1)= 1;
 
 
 % initialize empty arrays to hold amplitudes
@@ -61,8 +61,9 @@ y = [0,7.88095366723674e-05,0.00103125740020056,0.00425802631203408,0.0109487106
 
 %% Generate parameter variance estimates 
 
+alph=1; % Adjusts the variance of the parameter estimate
 Vhat_ = Vhat(y,[exp(1),10],tau,P,T,n,eivs,rkhs_eigenfile,data_path);
-%Vhat_ = inv(diag(diag(inv(Vhat_))));
+%Vhat_ = diag(diag(Vhat_));
 
 %% MCMC
 
@@ -70,20 +71,21 @@ Vhat_ = Vhat(y,[exp(1),10],tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 epsilon = 10^(-4);
 nEndingSteps=5;
 
-% Initialize steps
+% Initialize
 k=2;
-rejected=zeros(nTheta,1);
+rejected=0;
 progress=struct();
 
 
-while ~converged(a,k,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
+while ~converged(a,k,nEndingSteps,burnout,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
         
     c = unifrnd(0,1,nTheta,1); % Generates a uniform random number for each parameter
     
-%     Vhat_= Vhat(y,thetas(:,k-1),tau,P,T,n,eivs,rkhs_eigenfile,data_path);
-%     Vhat_= inv(diag(diag(inv(Vhat_))));
+    thetas(:,k)=mvnrnd(thetas(:,k-1),alph*Vhat(y,thetas(:,k-1),tau,P,T,n,eivs,rkhs_eigenfile,data_path));
+%    thetas(:,k)=mvnrnd(thetas(:,k-1),alph*Vhat_);
     
     while any(thetas(:,k)<=0)
+%        thetas(:,k) = mvnrnd(thetas(:,k-1),alph*Vhat(y,thetas(:,k-1),tau,P,T,n,eivs,rkhs_eigenfile,data_path));
         thetas(:,k) = mvnrnd(thetas(:,k-1),alph*Vhat_);
     end
     
@@ -93,24 +95,24 @@ while ~converged(a,k,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITIO
         if c(i) > acc(i)
 %             [i,c(i),acc(i),thetas(i,k),thetas(i,k-1)]
 %             pause
-            rejected(i) = rejected(i) + 1;
+            rejected = rejected + 1;
             thetas(i,k)=thetas(i,k-1);
         end
     end
 
-    if k<burnoff
-        fprintf('Burnoff step %i\n',k);
+    if k<burnout
+        fprintf('Burnout step %i\n',k);
         fprintf('theta(1)=%d, theta(2)=%d\n',thetas(1,k),thetas(2,k));
         k=k+1;
         continue
     end
     
-    EV=EV_aP_given_theta_y(thetas(:,k-burnoff+1),y,rkhs_eigenfile,P,T,n,tau,data_path);
+    EV=EV_aP_given_theta_y(thetas(:,k-burnout+1),y,rkhs_eigenfile,P,T,n,tau,data_path);
     
     mus = EV{1};
     covs = EV{2};
     
-    a(:,k+1-burnoff) = mvnrnd(mus,covs);
+    a(:,k+1-burnout) = mvnrnd(mus,covs);
     
     progress.step = k;
     progress.theta1=thetas(1,k);
@@ -124,11 +126,11 @@ while ~converged(a,k,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITIO
     
 end
 
-ones(nTheta,1)-rejected/k
+1-rejected/k
 
-f = f_from_a_eifs(mean(a(:,1:k-burnoff),2)',eifs);
+f = f_from_a_eifs(mean(a(:,1:k-burnout),2)',eifs);
 plot(f(t))
 hold on
 plot(sampled_u)
 figure
-scatter(thetas(1,burnoff:end),thetas(2,burnoff:end))
+scatter(thetas(1,burnout:end),thetas(2,burnout:end))

@@ -13,5 +13,5 @@ function deiv = deiv(theta,P,T)
     js = 1:P;
     
     deiv(:,1) = T^2 ./ ( (js-1)*pi+pi/2).^2;
-    deiv(:,2) = 0;
+    deiv(:,2) = zeros(1,P);
 end

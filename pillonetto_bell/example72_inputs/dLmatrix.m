@@ -7,6 +7,7 @@ function dLmatrix = dLmatrix(theta,P,n,Lmatrix)
     nTheta = length(theta);    
     
     dLmatrix = zeros(P,n,nTheta);
+    dLmatrix(:,:,1) = Lmatrix/theta(1);
     dLmatrix(:,:,2) = -2*theta(2)*Lmatrix;
     
     

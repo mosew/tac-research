@@ -2,7 +2,7 @@ function f = f_from_a_eifs(a,eifs)
 
     % INPUTS:
     % a is a 1xP vector of coefficients
-    % eifs is a 1xP cell array of eigenfunction handles
+    % eifs is a Px1 cell array of eigenfunction handles
     %
     % OUTPUTS:
     % f is a function handle representing 

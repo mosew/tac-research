@@ -9,6 +9,6 @@ function infoTheta = infoTheta()
     % theta(1)~exponential(1)? Jeffreys prior?
     % theta(2)~N(10,2)
     
-    infoTheta = [0.001,0;0,0.25];
+    infoTheta = [0.01,0;0,0.25];
     
 end

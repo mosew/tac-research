@@ -1,9 +1,12 @@
 function bool = isPbigenough(fksCoarse,fksFine,T)
     % fkCoarse (resp. fkFine)
-    % is a K x n array where the k^th ROW is the sum of the first P (resp. Q=floor(gamma*P)+1)
+    % is a K x n array where the k^th ROW is the sum of the first P (resp. Q)
     % eigenfunctions with coeffs a^k, where k is the #iteration of the MCMC
     
     
+    
+    % fkFine   is a K x n array of function handles, where the k^th is the sum of the first Q eigenfunctions with coeffs a^k, where k is the #iteration of the MCMC
+
     e = 0.02;
 %    gamma = 1.25;
     

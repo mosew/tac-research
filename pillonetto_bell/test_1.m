@@ -1,4 +1,4 @@
-P = 8;
+P = 15;
 T = 1;
 tau=1/50;
 n=50;
@@ -39,12 +39,13 @@ Vy_th_ = Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path);
 
 Lmatrix_ = Lmatrix(theta,P,T,rkhs_eigenfile,n,tau);
 dLmatrix_ = dLmatrix(theta,P,n,Lmatrix_);
+d2Lmatrix_ = d2Lmatrix(theta,P,n,Lmatrix_);
 
 dVy_th_ = dVy_th(theta,P,T,n,eivs,Lmatrix_);
 d2Vy_th_ = d2Vy_th(theta,P,T,n,eivs,Lmatrix_,dLmatrix_);
 
-d2logpy_th_=d2logpy_th(y,theta,tau,P,T,n,eivs,rkhs_eigenfile,data_path);
+d2logpy_th_ = d2logpy_th(y,theta,tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 
-Vh = Vhat(y_total,theta,tau,P,T,n,eivs,rkhs_eigenfile,data_path);
-eigs(Vh)
-eigs(diag(diag(Vh)))
+Vh = Vhat(y,theta,tau,P,T,n,eivs,rkhs_eigenfile,data_path);
+% eigs(Vh)
+% eigs(diag(diag(Vh)))

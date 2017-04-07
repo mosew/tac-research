@@ -19,7 +19,8 @@ function EV = EV_aP_given_theta_y(theta,y,rkhs_eigenfile,P,T,n,tau,data_path)
     %LMatrix=sample_eigenfunctions(eifs,(1/n):(1/n):T);
     
     EV = cell(1,2);
-    EV{1} = diag(eivs)*LMatrix'*(Vy_th_\y');
+    EV{1} = diag(eivs)*(LMatrix'/Vy_th_)*y';
     EV{2} = diag(eivs)-diag(eivs)*LMatrix'*(Vy_th_\LMatrix)*diag(eivs);
+    EV{2} = (EV{2} + EV{2}') / 2;
     
 end

@@ -1,6 +1,10 @@
 %% Make tables to compare my data to Gary's
 global u_total tau y_total
 
+
+
+
+
 %% Compute error for Gary's
 
 % Change directory to his

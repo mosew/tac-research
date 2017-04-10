@@ -10,7 +10,7 @@ Start_Row = find((NUM(:,1)== str2num(Participant)));
 
 if isempty(Start_Row)
 
-    display(['Error: Training data for participant ',Participant,' not found.']) 
+    fprintf(['Error: Training data for participant ',Participant,' not found.']) 
     Error_Flag = true;
    
     return
@@ -19,8 +19,8 @@ end
 
 End_Row = find((~isnan(NUM((Start_Row + 1):end,1))),1) + Start_Row - 1;
 
-if isempty(End_Row) End_Row = length(Num(:,1));
-    
+if isempty(End_Row)
+    End_Row = length(Num(:,1));
 end
 
 BrAC = NUM(Start_Row:End_Row,[2,3]);

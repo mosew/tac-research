@@ -2,7 +2,7 @@ K = size(thetas,2)-burnoff;
 gamma = 1.25;
 ths = thetas(:,1:K);
 
-P=150
+P=60
 Q = floor(gamma*P)+1;
 
 a=amps_from_th(P,K,ths,y,rkhs_eigenfile,T,n,tau,data_path);
@@ -12,10 +12,8 @@ b=amps_from_th(Q,K,ths,y,rkhs_eigenfile,T,n,tau,data_path);
 fksCoarse = cell(P,1);
 fksFine = cell(Q,1);
 
-for i = 1:Q
-    if i<=P
-        fksCoarse{i} = f_from_a_eifs(a(:,i)',eifs(1:P));
-    end
+for i = 1:K
+    fksCoarse{i} = f_from_a_eifs(a(:,i)',eifs(1:P));
     fksFine{i} = f_from_a_eifs(b(:,i)',eifs(1:Q));
 end
 
@@ -27,24 +25,39 @@ while ~isPbigenough(fksCoarse,fksFine,T)
 
     Q = floor(gamma*P)+1;
     b=amps_from_th(Q,K,ths,y,rkhs_eigenfile,T,n,tau,data_path);
-    for i = 1:Q
+    for i = 1:K
         fksFine{i} = f_from_a_eifs(b(:,i)',eifs(1:Q));
     end
     
     
     figure
+    hold on
     
-    coarseFcns = zeros(P,n);
-    for i = 1:P
+    coarseFcns = zeros(K,n);
+    for i = 1:K
         coarseFcns(i,:) = feval(fksCoarse{i},t);
     end
-    plot(mean(coarseFcns,1))
+    plot(mean(coarseFcns,1),'b-')
     
-    hold on
-    fineFcns = zeros(Q,n);
-    for i = 1:Q
+    lo_up_mid = confidence_limits(fksCoarse);
+    loCo=lo_up_mid{1};
+    hiCo=lo_up_mid{2};
+    plot(loCo(t),'b--')
+    plot(hiCo(t),'b--')
+    
+    
+
+    fineFcns = zeros(K,n);
+    for i = 1:K
         fineFcns(i,:) = feval(fksFine{i},t);
     end
-    plot(mean(fineFcns,1))
+    plot(mean(fineFcns,1),'r-')
+    lo_up_mid = confidence_limits(fksFine);
+    loFi=lo_up_mid{1};
+    hiFi=lo_up_mid{2};
+    plot(loFi(t),'r--')
+    plot(hiFi(t),'r--')
+    
+    pause
 end    
 P

@@ -1,0 +1,72 @@
+
+LINEAR OR SPLINE FIT?
+	Gary's uses splines, so I should use splines?
+	
+REGULARIZATION CHOICE?
+	Gary's finds optimal lambda
+	Mine fixed 0.1. Maybe just use 0.1.
+
+don't use?
+error measures per episode
+	peak height
+	peak time
+	AUC
+	L2
+	Linf
+	
+error measures per patient/device pair (training/test)
+	averages computed over set of episodes per patient
+		average peak height
+		average peak time
+		average AUC
+		average Linf
+		(average L2)
+	parameters per patient/device pair
+	
+overall error measures (for a given set of hyperparameters, training/test)
+	average peak height
+	average peak time
+	average AUC
+	(average Linf)
+	(average L2)
+	distribution of estimated parameters
+	
+
+	
+	
+
+
+estimate using Gary's method for 6 splines per hour
+	Single training episode each time
+estimate using my method (simultaneous) for
+	6 splines per hour, M=0
+	single training episode
+	i.e. direct comparison
+	
+	
+	
+then do the same for my improvements:
+	M=0,1
+	(2,4,) 6 splines per hour
+	1,3,9(,27 if we have em) training episodes
+	test on ALL NON-TRAINING episodes.
+	------
+	6 (9,12) paradigms results tables
+	
+	
+	Tables:
+		PER PATIENT
+		One for each error measure
+		Columns: hyperparameters/paradigms
+		Rows: patients
+		
+		OVERALL
+		One table
+		columns: hyperparameters/paradigms
+		rows: error measures
+	
+	
+	Plots:
+		Choose a few "test episodes" at random BEFORE everything
+		For each of these test episodes,
+			1 figure, actual BrAC plot against estimated BrAC for each(?) hyperparameter paradigm.

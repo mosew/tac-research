@@ -1,4 +1,4 @@
-%% Run model for various values of M, P, testing paradigms, episodes
+%% Run MY model for various values of M, P, testing paradigms, episodes
 
 %% Set up globals
 global training test tau u_total
@@ -15,7 +15,7 @@ reprocess_data
 % M, P, lambda, test paradigm, test episode
 
 Ms=[0];
-Ps=[40,80,160]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
+Ps=[40,80,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
 lambdas=[0.1];
 paradigms =[7:10];
 testeps=1:5;

@@ -13,6 +13,10 @@ function p_theta = p_theta(i,theta)
                 p_theta=log(theta(1));
             end
         case 2
-            p_theta=normpdf(theta(2),10,2);
+            if theta(2)<=0
+                p_theta = 0;
+            else
+                p_theta=normpdf(theta(2),10,2);
+            end
     end
 end

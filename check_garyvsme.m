@@ -1,4 +1,5 @@
-
+clear
+load('030117_234splhr_fixedtraining_testeps15_arrays.mat')
 %don't use 3 or 9
 test=5;
 % number of training episodes for me (episodes 6 through 9)
@@ -18,8 +19,8 @@ TAC=[eval(sprintf('t_TAC_5122_%i',train))', eval(sprintf('data_TAC_5122_%i',trai
 [q_1_out,q_2_out,q_3_out,r1_r2_h,Est_TAC_q_in,Est_TAC_q_out] = BrAC_Estimator_Filter_Design_2(q_1_in,q_2_in,q_3_in,BrAC,TAC);
 
 
-plot(Est_TAC_q_in(:,1),Est_TAC_q_in(:,2)/1000)
-plot(Est_TAC_q_out(:,1),Est_TAC_q_out(:,2)/1000)
+plot(Est_TAC_q_in(:,1)*5,Est_TAC_q_in(:,2)/1000)
+plot(Est_TAC_q_out(:,1)*5,Est_TAC_q_out(:,2)/1000)
 
 
 

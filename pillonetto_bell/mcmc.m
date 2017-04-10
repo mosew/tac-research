@@ -7,14 +7,14 @@ data_path = 'none';
 % data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
-P = 9;   %number of eigenfunctions
+P = 50;   %number of eigenfunctions
 T = 1;
 n = 50;
 tau = 1/50;
 t = 0:tau:(T-tau);
-burnoff = 60;
-K = 300;
-alph=200; % Adjusts the variance of the parameter estimate
+burnoff = 100;
+K = 800;
+alph = 500; % Adjusts the variance of the parameter estimate
 
 
 %% Generate initial theta
@@ -23,11 +23,11 @@ alph=200; % Adjusts the variance of the parameter estimate
 nTheta=2;
 
 % initialize empty arrays to hold parameter values
-thetas=zeros(nTheta,K-burnoff);
+thetas=zeros(nTheta,K);
 
 % Initial parameter guesses
 thetas(1,1)= 1;
-thetas(2,1)= 10;
+thetas(2,1)= 1;
 
 
 % initialize empty arrays to hold amplitudes
@@ -76,16 +76,16 @@ rejected=zeros(nTheta,1);
 progress=struct();
 
 
-while ~converged(a,k,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
+while ~converged(a,k,K,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
         
     c = unifrnd(0,1,nTheta,1); % Generates a uniform random number for each parameter
     
 %     Vhat_= Vhat(y,thetas(:,k-1),tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 %     Vhat_= inv(diag(diag(inv(Vhat_))));
     
-    while any(thetas(:,k)<=0)
+   while any(thetas(:,k)<=0)
         thetas(:,k) = mvnrnd(thetas(:,k-1),alph*Vhat_);
-    end
+   end
     
     acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     
@@ -93,7 +93,9 @@ while ~converged(a,k,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITIO
         if c(i) > acc(i)
 %             [i,c(i),acc(i),thetas(i,k),thetas(i,k-1)]
 %             pause
-            rejected(i) = rejected(i) + 1;
+            if k>burnoff
+                rejected(i) = rejected(i) + 1;
+            end
             thetas(i,k)=thetas(i,k-1);
         end
     end
@@ -124,11 +126,15 @@ while ~converged(a,k,nEndingSteps,burnoff,epsilon) %PAPER'S CONVERGENCE CONDITIO
     
 end
 
+% MCMC acceptance rate for theta
 ones(nTheta,1)-rejected/k
 
+% Plot sample mean input function
 f = f_from_a_eifs(mean(a(:,1:k-burnoff),2)',eifs);
 plot(f(t))
 hold on
 plot(sampled_u)
+
+% Scatterplot thetas
 figure
 scatter(thetas(1,burnoff:end),thetas(2,burnoff:end))

@@ -1,6 +1,4 @@
 
-
-
 global tau M N P
     N=32; % state and evolution operator discretization index
     

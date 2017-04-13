@@ -1,0 +1,40 @@
+PLAN FOR NOT OVERHAUL
+
+
+for each paradigm
+	collect per-episode and overall mean and var of 
+		peak height error
+		peak time error
+		Linf error
+		L2 error
+		AUC error
+		
+dataG_episodes[train,test] a struct of per-episode mean/var of ^^
+dataG_overall a struct of overall mean/var of ^^
+dataMe_1train_episodes[trainingind,test] a struct of per-episode mean/var of ^^
+dataMe_1train_overall
+dataMe_2train_episodes[trainingind,test]
+dataMe_2train_overall
+?? dataMe_4train_episodes[trainingind,test]
+?? dataMe_4train_overall
+dataMe_8train_episodes[trainingind,test]
+dataMe_8train_overall
+
+
+
+for each "me"
+	M = 0 (or 1 ?)
+	P = 2 spl/hr only?
+	lambda = 0.1
+	
+Training/testing
+	Train Gary on i, test on j
+		9*9 = 81
+	Train each me on i, test on j
+		9*9 = 81
+	Train each me on each pair, test on j
+		36*9 = 324
+	Train each me on each set of 4, test on j
+		504*9 = 4536
+	Train each me on all but j, test on j	
+		9*9 = 81

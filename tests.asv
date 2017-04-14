@@ -14,19 +14,15 @@ reprocess_data
 
 % M, P, lambda, test paradigm, test episode
 
-Ms=[0];
-Ps=[40]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
+Ms=[0,1];
+Ps=[40,120]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
 lambdas=[0.1];
-traineps=nchoosek(1:9,8);
-testeps=9:(-1):1;
+traineps=nchoosek(1:9,2);
+testeps=1:9;
 
 %% Define cell array to hold test data
 fprintf('Creating empty cell array\n')
-b = cell(length(traineps),length(testeps));
-M=0;
-P=40;
-lambda=0.1;
-lambda2=0.1;
+ b = cell(length(Ms),length(Ps),length(lambdas),length(traineps),length(testeps));
 fprintf('Done creating empty cell array\n')
 numRuns=numel(b);
 thisRun=0;
@@ -38,11 +34,10 @@ rtTot=0;
 % Excluded original episodes 3 and 9
 % Excluded 3 because (adjusted) TAC signal never returns to 0
 % Excluded 9 because Susan took off the bracelet during the episode
-for i = 1:9
-    test=i;
+for test = 1:9
     % Current test episode
-    for tr = 1:length(traineps)
-        training = traineps(tr,:);
+    for training = 1:9
+    
     
 %     % For testing paradigms 1 through 5
 %     % paradigm 1: training and testing on same episode
@@ -100,24 +95,24 @@ for i = 1:9
 %         % Test episode i
 %         test = i;
 
-%         
-%         % For various values of M
-%         for Mind = 1:length(Ms)
-%             M = Ms(Mind);
-%             
-%             % For various values of P
-%             for Pind = 1:length(Ps)
-%                 P = Ps(Pind);
-%                 
-%                 % For various regularizations
-%                 for lambdaInd = 1:length(lambdas)
-%                     lambda = lambdas(lambdaInd);
-%                     lambda2= lambdas(lambdaInd);
-%                 
+        
+        % For various values of M
+        for Mind = 1:length(Ms)
+            M = Ms(Mind);
+            
+            % For various values of P
+            for Pind = 1:length(Ps)
+                P = Ps(Pind);
+                
+                % For various regularizations
+                for lambdaInd = 1:length(lambdas)
+                    lambda = lambdas(lambdaInd);
+                    lambda2= lambdas(lambdaInd);
+                
                     
                     % Run the minimization script and time it
                     tic
-                    fprintf('Testing on M=%i, P=%i, lambda=%0.3g, training episode(s) index=%i, test episode=%i \n',M,P,lambda,tr,test)
+                    fprintf('Testing on M=%i, P=%i, lambda=%0.3g, training episode(s)=%i, test episode=%i \n',M,P,lambda,training,test)
                     minimize_uspline
                     r=toc;
 
@@ -138,9 +133,8 @@ for i = 1:9
                     end
                     
                     % Define and collect struct of collected data
-                    fprintf('Filling in cell %i,%i\n\n',tr,test);
-                    b{tr,test} = struct('tau',{tau},'M',{M},'P',{P},'lambda',{lambda},...
-                                                 'training_episodes',{training},'test_episode',{test},...
+                    b{Mind,Pind,lambdaInd,training,test} = struct('tau',{tau},'M',{M},'P',{P},'lambda',{lambda},...
+                                                 'training_episode',{training},'test_episode',{test},...
                                                  'trained_parameters',{[q2_star,q1M_star]},...
                                                  'full_deconvolved_BrAC',{u_star},...
                                                  'actual_error',{u_star-test_u},...
@@ -151,17 +145,17 @@ for i = 1:9
                                                  'peak_height_error',{peak_est-peak_act},...
                                                  'badscale',{badscale});
                                              
-                    %if Mind==1
+                    if Mind==1
                         if q1M_star(1)~=q1M_star(2)
                             fprintf('CONSTANT DIFFUSIVITY RESTRICTION BROKEN\n')
                         end
-                    %end
+                    end
                     
                     
-%                 end
-%             end    
-%         end
+                end
+            end    
+        end
     end
 end
 fprintf('Saving test results cell array\n')
-save('0414_2splhr_8training_alltesteps.mat','b')
+save('0413_246splhr_alleps.mat','b')

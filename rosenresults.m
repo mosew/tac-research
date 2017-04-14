@@ -1,3 +1,5 @@
+clear
+load('ZD_Data_5122_minutes.mat')
 
 global u_total tau
 test_episodes = u_total;
@@ -72,7 +74,7 @@ for test=1:9
         
     end
     
-    q2_MSE(test) = mean(q2(:,test));
+    q2_mean(test) = mean(q2(:,test));
     q2_sd(test) = std(q2(:,test));
     q1_mean(test)=mean(q1(:,test));
     q1_sd(test)=std(q1(:,test));
@@ -111,3 +113,5 @@ overall_Linf = [mean(Linf_mean),std(reshape(Linf_errors,81,1))];
 overall_AUC = [mean(AUC_mean),std(reshape(AUC_errors,81,1))];
 overall_peaktime = [mean(peaktime_mean),std(reshape(peak_time_errors,81,1))];
 overall_peakheight = [mean(peakheight_mean),std(reshape(peak_height_errors,81,1))];
+
+save('rosen_results.mat');

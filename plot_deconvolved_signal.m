@@ -2,12 +2,11 @@
 
 reprocess_data
 
-
 for i = 1:5
-
     
     subplot(2,3,i)
     hold on
+
     %m,p,la,para,i
     a=cell2mat(full_deconvolved_BrACs(1,1,1,:,i));
     
@@ -39,11 +38,11 @@ for i = 1:5
     ylim([0,75])
     
     if i==5
-        h=legend('trained on ep 6','trained on eps 6:7','trained on eps 6:8','trained on eps 6:9','sampled BrAC','interpolated BrAC','Est. BrAC, prev. method, trained on episode 6');
+        h=legend('trained on ep 6','trained on eps 6:7','trained on eps 6:9','sampled BrAC','interpolated BrAC','Est. BrAC, prev. method, trained on episode 6');
         pos=get(h,'position');
         set(h,'position',[0.55,0.2,pos(3:4)])
     end
     
 end
 set(0,'defaulttextinterpreter','latex')
-suptitle(['$\lambda=0.1$, constant diffusivity, 2 splines/hr', char(10), '\qquad regularization on $|u|$ and $|u"|$'])
+suptitle(['$\lambda=0.1$, constant diffusivity, 2 splines/hr'])

@@ -31,8 +31,6 @@ overall error measures (for a given set of hyperparameters, training/test)
 	(average L2)
 	distribution of estimated parameters
 	
-
-	
 	
 
 

@@ -1,0 +1,101 @@
+OVERHAUL OF CODE
+
+Notes:
+
+	Length of a certain episode will be uniform between BrAC and TAC.
+	If the maximum BrAC/TAC timestamp of an episode exceeds the maximum TAC/BrAC timestamp
+		then the longer one will be truncated ?? and fit to the end of the shorter one by interpolation
+	
+	
+
+forward dynamical system simulation:
+
+	input
+		-u
+			ni x 2 ARRAY
+				BrAC samples
+					First column is timestamps of samples in HOURS
+					Second column is BrAC reading in PERCENT				
+				
+			**Any pre-processing of BrAC signal, like linear interpolation or fitting to a spline, is done elsewhere.
+				
+		-q1M
+			(M+1)x1 ARRAY
+				M will be deduced from length of q1M
+		-q2
+			NUMBER
+		-tau
+			NUMBER
+				timestep length of corresponding discrete dynamical system
+		-N
+			NUMBER
+				approximation of infinite-dimensional dynamical system by matrices of size ~N
+		-P
+			NUMBER
+				Simulated output mesh size
+				the number of splines per hour to fit the output signal to.
+			
+			
+	output
+		-Simulated TAC
+			ni x 2 ARRAY
+				ni is the number of input (BrAC) samples.
+			
+			
+JN_and_dJN:
+
+	global variables used
+		-m
+			NUMBER
+				number of training episodes
+		-n_in
+			m x 1 ARRAY
+				n_in(i) = the number of BrAC samples in training episode i
+		-n_out
+			m x 1 ARRAY
+				n_out(i) = the number of TAC samples in training episode i
+		-test_ep_length
+			NUMBER
+				timestamp of last sample of BrAC and/or TAC in test episode
+		-tau
+			NUMBER
+				timestep length of corresponding discrete dynamical system
+		-N
+			NUMBER
+				approximation of infinite-dimensional dynamical system by matrices of size ~N
+		-P
+			NUMBER
+				of splines per hour to fit the output signal to
+		-u_train
+			m x 1 CELL ARRAY
+				Each element of the cell array is an n_in(i) x 2 ARRAY, where
+					First column is timestamps of samples in HOURS
+					Second column is BrAC reading in PERCENT
+		-y_train
+			m x 1 CELL ARRAY
+				Each element of the cell array is an n_out(i) x 2 ARRAY, where
+					First column is timestamps of TAC samples in HOURS
+					Second column is TAC reading in PERCENT
+
+
+			
+
+	input
+		-q1M
+			Mx1 ARRAY
+		-q2
+			NUMBER
+		-c
+			(test_ep_length/P) x 2 ARRAY
+				Guess for the linear spline coefficients of input signal
+					First column is timestamps of samples in HOURS
+					Second column is BrAC reading in PERCENT
+					
+	output
+		-JN
+			NUMBER
+				Gradient J^N evaluated at q1M,q2,u
+		-dJN
+			(M+2+C)x1 ARRAY
+				C is the number of data points
+				Value of gradient of J^N evaluated at q1M,q2,u

@@ -17,14 +17,14 @@ reprocess_data
 Ms=[0];
 Ps=[40]; %splines per hour = P spl/ep * 1 ep/240step * 1step/5min * 60min/1hr = 60P/(240*5) = P/20; 1 spline per 1200/P minutes.
 lambdas=[0.1];
-traineps=nchoosek(1:9,8);
-testeps=9:(-1):1;
+traineps=nchoosek(1:9,4);
+testeps=1:9;
 
 %% Define cell array to hold test data
 fprintf('Creating empty cell array\n')
 b = cell(length(traineps),length(testeps));
-M=0;
-P=40;
+ M=0;
+ P=40;
 lambda=0.1;
 lambda2=0.1;
 fprintf('Done creating empty cell array\n')
@@ -146,22 +146,22 @@ for i = 1:9
                                                  'actual_error',{u_star-test_u},...
                                                  'L2_error',{sum((u_star-test_u).^2)},...
                                                  'Linf_error',{max(abs(u_star-test_u))},...
-                                                 'AUC_error',{sum(u_star)-sum(test_u)},...
-                                                 'peak_time_error',{tau*(peaktime_est-peaktime_act)},...
-                                                 'peak_height_error',{peak_est-peak_act},...
+                                                 'AUC_sq_error',{(sum(u_star)-sum(test_u)).^2},...
+                                                 'peak_time_sq_error',{(tau*(peaktime_est-peaktime_act)).^2},...
+                                                 'peak_height_sq_error',{(peak_est-peak_act).^2},...
                                                  'badscale',{badscale});
                                              
-                    %if Mind==1
+                    if Mind==1
                         if q1M_star(1)~=q1M_star(2)
                             fprintf('CONSTANT DIFFUSIVITY RESTRICTION BROKEN\n')
                         end
-                    %end
+                    end
                     
                     
-%                 end
-%             end    
+%             end
+%         end    
 %         end
     end
 end
 fprintf('Saving test results cell array\n')
-save('0414_2splhr_8training_alltesteps.mat','b')
+save('0416_2splhr_4training_alltesteps.mat','b')

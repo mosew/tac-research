@@ -1,9 +1,9 @@
 clear
 
 load('ZD_Data_5122_minutes.mat');
-load('0416_2splhr_8training_alltesteps.mat','b');
+load('0416_26splhr_M01_1training_alltesteps.mat','b');
 
-%b=permute(b(2,2,:,:),[4,1,2,3]);
+b=permute(b(2,2,:,:),[4,1,2,3]);
 
 n = numel(b);
 s = size(b);
@@ -17,22 +17,37 @@ peak_time_error_sq=zeros(s);
 peak_height_error_sq=zeros(s);
 
 
+testing = ~logical(eye(s(1)));
+
+
+
 q2_mean = zeros(1,9);
 q2_sd = zeros(1,9);
 q1_mean = zeros(1,9);
 q1_sd = zeros(1,9);
-L2_mean = zeros(1,9);
-L2_sd = zeros(1,9);
-Linf_mean = zeros(1,9);
-Linf_sd = zeros(1,9);
-AUC_sq_mean = zeros(1,9);
-AUC_sq_sd = zeros(1,9);
-peaktime_sq_mean = zeros(1,9);
-peaktime_sq_sd = zeros(1,9);
-peakheight_sq_mean = zeros(1,9);
-peakheight_sq_sd = zeros(1,9);
+
+% To gather data on mean error per test episode.
+L2_test_mean = zeros(1,9);
+L2_test_sd = zeros(1,9);
+Linf_test_mean = zeros(1,9);
+Linf_test_sd = zeros(1,9);
+AUC_sq_test_mean = zeros(1,9);
+AUC_sq_test_sd = zeros(1,9);
+peaktime_sq_test_mean = zeros(1,9);
+peaktime_sq_test_sd = zeros(1,9);
+peakheight_sq_test_mean = zeros(1,9);
+peakheight_sq_test_sd = zeros(1,9);
+
+L2_training = zeros(1,9);
+Linf_training = zeros(1,9);
+AUC_sq_training = zeros(1,9);
+peaktime_sq_training = zeros(1,9);
+peakheight_sq_training = zeros(1,9);
+
+% To gather training data
 
 for test = 1:9
+    
     
     for train = 1:size(b,1)
         
@@ -48,23 +63,38 @@ for test = 1:9
     
     end
 
+    
     q2_mean(test) = mean(q2(:,test));
     q2_sd(test) = std(q2(:,test));
-    q1_mean(test)=mean(q1(:,test));
-    q1_sd(test)=std(q1(:,test));
+    q1_mean(test) = mean(q1(:,test));
+    q1_sd(test) = std(q1(:,test));
+    
+    % Compute mean and std of estimates for each TEST episode across all
+    % training episodes
+    
+    L2_test_mean(test)=mean(L2_error(testing(test,:),test));
+    L2_test_sd(test)=std(L2_error(testing(test,:),test));
+    Linf_test_mean(test)=mean(Linf_error(testing(test,:),test));
+    Linf_test_sd(test)=std(Linf_error(testing(test,:),test));
+    AUC_sq_test_mean(test)=mean(AUC_error_sq(testing(test,:),test));
+    AUC_sq_test_sd(test)=std(AUC_error_sq(testing(test,:),test));
+    peaktime_sq_test_mean(test)=mean(peak_time_error_sq(testing(test,:),test));
+    peaktime_sq_test_sd(test)=std(peak_time_error_sq(testing(test,:),test));
+    peakheight_sq_test_mean(test)=mean(peak_height_error_sq(testing(test,:),test));
+    peakheight_sq_test_sd(test)=std(peak_height_error_sq(testing(test,:),test));
+    
+    L2_training(test) = L2_error(test,test);
+    Linf_training(test) = Linf_error(test,test);
+    AUC_sq_training(test) = AUC_error_sq(test,test);
+    peaktime_sq_training(test) = peak_time_error_sq(test,test);
+    peakheight_sq_training(test) = peak_height_error_sq(test,test);
 
-    L2_mean(test)=mean(L2_error(:,test));
-    L2_sd(test)=std(L2_error(:,test));
-    Linf_mean(test)=mean(Linf_error(:,test));
-    Linf_sd(test)=std(Linf_error(:,test));
-    AUC_sq_mean(test)=mean(AUC_error_sq(:,test));
-    AUC_sq_sd(test)=std(AUC_error_sq(:,test));
-    peaktime_sq_mean(test)=mean(peak_time_error_sq(:,test));
-    peaktime_sq_sd(test)=std(peak_time_error_sq(:,test));
-    peakheight_sq_mean(test)=mean(peak_height_error_sq(:,test));
-    peakheight_sq_sd(test)=std(peak_height_error_sq(:,test));
-
+    
 end
+
+
+
+
 % Plot results
 %
 % for test = 1:9
@@ -82,10 +112,17 @@ end
 % Now we need the overall mean and stds
 overall_q2 = [mean(q2_mean),std(reshape(q2,n,1))];
 overall_q1 = [mean(q1_mean),std(reshape(q1,n,1))];
-overall_L2 = [mean(L2_mean),std(reshape(L2_error,n,1))];
-overall_Linf = [mean(Linf_mean),std(reshape(Linf_error,n,1))];
-overall_AUC_sq = [mean(AUC_sq_mean),std(reshape(AUC_error_sq,n,1))];
-overall_peaktime_sq = [mean(peaktime_sq_mean),std(reshape(peak_time_error_sq,n,1))];
-overall_peakheight_sq = [mean(peakheight_sq_mean),std(reshape(peak_height_error_sq,n,1))];
+test_L2 = [mean(L2_test_mean),std(reshape(L2_error,n,1))];
+test_Linf = [mean(Linf_test_mean),std(reshape(Linf_error,n,1))];
+test_AUC_sq = [mean(AUC_sq_test_mean),std(reshape(AUC_error_sq,n,1))];
+test_peaktime_sq = [mean(peaktime_sq_test_mean),std(reshape(peak_time_error_sq,n,1))];
+test_peakheight_sq = [mean(peakheight_sq_test_mean),std(reshape(peak_height_error_sq,n,1))];
 
-save('my_results_8training_2splhr.mat');
+training_L2 = [mean(L2_training),std(L2_training)];
+training_Linf = [mean(Linf_training),std(Linf_training)];
+training_AUC_sq = [mean(AUC_sq_training),std(AUC_sq_training)];
+training_peaktime_sq = [mean(peaktime_sq_training),std(peaktime_sq_training)];
+training_peakheight_sq = [mean(peakheight_sq_training),std(peakheight_sq_training)];
+
+
+save('my_results_1training_M1_6splhr.mat');

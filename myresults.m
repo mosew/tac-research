@@ -1,20 +1,20 @@
 clear
 
 load('ZD_Data_5122_minutes.mat');
-load('0413_246splhr_alleps.mat','b');
+load('0416_2splhr_8training_alltesteps.mat','b');
 
-b=permute(b(1,1,1,:,:),[4,5,1,2,3]);
+%b=permute(b(2,2,:,:),[4,1,2,3]);
 
 n = numel(b);
 s = size(b);
 
 q1=zeros(s);
 q2=zeros(s);
-L2_errors = zeros(s);
-Linf_errors=zeros(s);
-AUC_errors=zeros(s);
-peak_time_errors=zeros(s);
-peak_height_errors=zeros(s);
+L2_error = zeros(s);
+Linf_error=zeros(s);
+AUC_error_sq=zeros(s);
+peak_time_error_sq=zeros(s);
+peak_height_error_sq=zeros(s);
 
 
 q2_mean = zeros(1,9);
@@ -25,12 +25,12 @@ L2_mean = zeros(1,9);
 L2_sd = zeros(1,9);
 Linf_mean = zeros(1,9);
 Linf_sd = zeros(1,9);
-AUC_mean = zeros(1,9);
-AUC_sd = zeros(1,9);
-peaktimeerror_mean = zeros(1,9);
-peaktime_sd = zeros(1,9);
-peakheight_mean = zeros(1,9);
-peakheight_sd = zeros(1,9);
+AUC_sq_mean = zeros(1,9);
+AUC_sq_sd = zeros(1,9);
+peaktime_sq_mean = zeros(1,9);
+peaktime_sq_sd = zeros(1,9);
+peakheight_sq_mean = zeros(1,9);
+peakheight_sq_sd = zeros(1,9);
 
 for test = 1:9
     
@@ -40,11 +40,11 @@ for test = 1:9
         parms = r.trained_parameters;
         q2(train,test) = parms(1);
         q1(train,test) = parms(2);
-        L2_errors(train,test) = r.L2_error;
-        Linf_errors(train,test)= r.Linf_error;
-        AUC_errors(train,test)= r.AUC_error;
-        peak_time_errors(train,test) = r.peak_time_error;
-        peak_height_errors(train,test)=r.peak_height_error;
+        L2_error(train,test) = r.L2_error;
+        Linf_error(train,test)= r.Linf_error;
+        AUC_error_sq(train,test)= r.AUC_sq_error;
+        peak_time_error_sq(train,test) = r.peak_time_sq_error;
+        peak_height_error_sq(train,test)=r.peak_height_sq_error;
     
     end
 
@@ -53,16 +53,16 @@ for test = 1:9
     q1_mean(test)=mean(q1(:,test));
     q1_sd(test)=std(q1(:,test));
 
-    L2_mean(test)=mean(L2_errors(:,test));
-    L2_sd(test)=std(L2_errors(:,test));
-    Linf_mean(test)=mean(Linf_errors(:,test));
-    Linf_sd(test)=std(Linf_errors(:,test));
-    AUC_mean(test)=mean(AUC_errors(:,test));
-    AUC_sd(test)=std(AUC_errors(:,test));
-    peaktime_mean(test)=mean(peak_time_errors(:,test));
-    peaktime_sd(test)=std(peak_time_errors(:,test));
-    peakheight_mean(test)=mean(peak_height_errors(:,test));
-    peakheight_sd(test)=std(peak_height_errors(:,test));
+    L2_mean(test)=mean(L2_error(:,test));
+    L2_sd(test)=std(L2_error(:,test));
+    Linf_mean(test)=mean(Linf_error(:,test));
+    Linf_sd(test)=std(Linf_error(:,test));
+    AUC_sq_mean(test)=mean(AUC_error_sq(:,test));
+    AUC_sq_sd(test)=std(AUC_error_sq(:,test));
+    peaktime_sq_mean(test)=mean(peak_time_error_sq(:,test));
+    peaktime_sq_sd(test)=std(peak_time_error_sq(:,test));
+    peakheight_sq_mean(test)=mean(peak_height_error_sq(:,test));
+    peakheight_sq_sd(test)=std(peak_height_error_sq(:,test));
 
 end
 % Plot results
@@ -82,10 +82,10 @@ end
 % Now we need the overall mean and stds
 overall_q2 = [mean(q2_mean),std(reshape(q2,n,1))];
 overall_q1 = [mean(q1_mean),std(reshape(q1,n,1))];
-overall_L2 = [mean(L2_mean),std(reshape(L2_errors,n,1))];
-overall_Linf = [mean(Linf_mean),std(reshape(Linf_errors,n,1))];
-overall_AUC = [mean(AUC_mean),std(reshape(AUC_errors,n,1))];
-overall_peaktime = [mean(peaktimeerror_mean),std(reshape(peak_time_errors,n,1))];
-overall_peakheight = [mean(peakheight_mean),std(reshape(peak_height_errors,n,1))];
+overall_L2 = [mean(L2_mean),std(reshape(L2_error,n,1))];
+overall_Linf = [mean(Linf_mean),std(reshape(Linf_error,n,1))];
+overall_AUC_sq = [mean(AUC_sq_mean),std(reshape(AUC_error_sq,n,1))];
+overall_peaktime_sq = [mean(peaktime_sq_mean),std(reshape(peak_time_error_sq,n,1))];
+overall_peakheight_sq = [mean(peakheight_sq_mean),std(reshape(peak_height_error_sq,n,1))];
 
 save('my_results_8training_2splhr.mat');

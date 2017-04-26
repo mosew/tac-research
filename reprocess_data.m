@@ -18,7 +18,8 @@ data_BrAC_5122{8} = [0,32,data_BrAC_5122{8}(2:end)']';
 % should be 22, for some reason.
 
 %% Pad pads the beginning of each episode with 5*pad minutes of zeros
-pad = 6; %This value of pad=6 appears hard-coded elsewhere...
+% pad = 6; %This value of pad=6 appears hard-coded elsewhere i think
+pad = 3*60/5;
 cutoff = 2;
 
 data_TAC_5122 = cell(1,11);
@@ -59,6 +60,7 @@ end
 
 %% We want to exclude episodes 3 and 9
 % Episode 3 the TAC signal never returns to 0
+% Episode 5 gives anomalous results for some reason
 % Episode 9 Susan takes off her sensor during the drinking episode    
 dontuse = [3,9];
 toUseIndex = true(1,11);

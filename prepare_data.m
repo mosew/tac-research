@@ -40,7 +40,7 @@ for i=1:length(t_TAC)
 end
 
 % Not gonna use the above anymore -- just set it to 240 steps exactly.
-max_n_in = 240;
+max_n_in = 240+3*12;
 
 % Number of timesteps in output vector
 n_out = floor(max_n_in * tau_in / tau_out);

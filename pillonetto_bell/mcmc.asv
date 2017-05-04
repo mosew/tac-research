@@ -12,9 +12,9 @@ T = 1;
 n = 50;
 tau = 1/49;
 t = 0:tau:T;
-burnin = 50;
-K = 350;
-alph = 8; % Adjusts the variance of the parameter estimate
+burnin = 30;
+K = 200;
+alph = 34; % Adjusts the variance of the parameter estimate
 
 
 % w = warning('query','last');
@@ -101,7 +101,6 @@ while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITI
 %             pause
             if k>burnin
                 rejected(i) = rejected(i) + 1;
-                fprintf('Rejected theta(%i) at %d \n',i,c(i));
             end
             thetas(i,k)=thetas(i,k-1);
         end

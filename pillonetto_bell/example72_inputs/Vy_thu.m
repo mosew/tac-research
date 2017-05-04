@@ -10,7 +10,9 @@ function Vy_thu = Vy_thu(theta,n,u)
         conv_u(i) = L_i(theta,u,i,tau);
     end
     
-    Vy_thu = .05 *.05 * (conv_u' * conv_u);
+    %Vy_thu = .05 *.05 * (conv_u' * conv_u);
+    
+    Vy_thu = .05*.05* diag(conv_u).^2;
     
 %     for i = 1:n
 %         for k = 1:i

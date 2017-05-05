@@ -16,7 +16,7 @@ function convolved_eifs = convolve_eifs(eifs,theta,P,n,tau)
     convolved_eifs = zeros(P,n);
     for i = 1:n
         for j = 1:P
-            convolved_eifs(j,:) = L_i(theta,eifs{j},i,tau);
+            convolved_eifs(j,i) = L_i(theta,eifs{j},i,tau);
         end
     end
 end

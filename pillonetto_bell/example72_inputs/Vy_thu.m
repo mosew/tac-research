@@ -5,8 +5,8 @@ function Vy_thu = Vy_thu(theta,n,u)
     tau = 1/(n-1);
     Vy_thu = zeros(n);
     
-    for i = 1:n
-        Vy_thu(i,i) = (.05*L_i(theta,u,i,tau))^2;
+    for i = 0:(n-1)
+        Vy_thu(i+1,i+1) = (.05*L_i(theta,u,i,tau))^2;
     end
     
 %     Vy_thu = .05*.05* diag(L_i_row(theta,u,tau)).^2;

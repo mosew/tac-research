@@ -10,12 +10,12 @@ function output = L_i_row(theta,f,tau)
     % FOR EXAMPLE 7.2 OF PILLONETTO-BELL
   
     N = 10^3;
-    t = 0:(tau/(N-1)):1;
+    t = tau:(tau/N):1;
     
     gsamp = exp(-theta(2).*t);
     fsamp = feval(f,t);
-    output = conv(fsamp,gsamp,'same');
-    output = output(1:(N-1):end);
+    output = conv(fsamp,gsamp,'full');
+    output = output(1:N:(50*N+1));
 %     
 %     fxg = @(s) feval(f,s).*feval(g,i*tau-s);
 %     output = integral(fxg,0,i*tau,'RelTol',1e-3);

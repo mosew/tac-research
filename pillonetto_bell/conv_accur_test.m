@@ -1,24 +1,23 @@
 theta = [exp(1),2];
-i = 15;
-tau = 1/49;
+tau = 1/50;
 
 g = @(s) exp(-theta(2)*s);
-f = @(s) 2*sin(s);
-fxg = @(s) feval(f,s).*feval(g,i*tau-s);
+f = @(s) 2*sin(s*8);
 
-N = 10^3;
-t = 0:(tau/(N-1)):1;
+N = 4*10^3;
+t = tau:(tau/N):1;
 
 gsamp = exp(-theta(2).*t);
 fsamp = feval(f,t);
-output = conv(fsamp,gsamp,'same');
-output = output(1:(N-1):end);
+output = conv(fsamp,gsamp,'full')*tau/N;
+output = output(1:N:(50*N+1));
 
 plot(output);
 hold on
 outty = zeros(1,50);
 for i = 1:50
-    outty(i) = integral(fxg,0,(i-1)*tau);
+    fxg = @(s) feval(f,s).*feval(g,i*tau-s);
+    outty(i) = integral(fxg,0,i*tau);
 end
 plot(outty)
-legend('Discrete','Continuous')
+%legend('Discrete','Continuous')

@@ -9,7 +9,7 @@ function output = L_i_row(theta,f,tau)
     %
     % FOR EXAMPLE 7.2 OF PILLONETTO-BELL
   
-    N = 10^2;
+    N = 10^3;
     t = 0:(tau/(N-1)):1;
     
     gsamp = exp(-theta(2).*t);

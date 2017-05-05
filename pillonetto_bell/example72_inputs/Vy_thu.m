@@ -1,19 +1,19 @@
 function Vy_thu = Vy_thu(theta,n,u)
     % I think this is where our covariance estimate will come in
     
-    %Vy_thu = .05*eye(n);
     
     tau = 1/(n-1);
-    conv_u = zeros(1,n);
-        
+    Vy_thu = zeros(n);
+    
     for i = 1:n
-        conv_u(i) = L_i(theta,u,i,tau);
+        Vy_thu(i,i) = (.05*L_i(theta,u,i,tau))^2;
     end
     
-    %Vy_thu = .05 *.05 * (conv_u' * conv_u);
+%     Vy_thu = .05*.05* diag(L_i_row(theta,u,tau)).^2;
     
-    Vy_thu = .05*.05* diag(conv_u).^2;
     
+%     Vy_thu = .05*eye(n);
+
 %     for i = 1:n
 %         for k = 1:i
 %             Vy_thu(i,k) = conv_u(i)*conv_u(k);

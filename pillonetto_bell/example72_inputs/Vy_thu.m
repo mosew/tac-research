@@ -3,7 +3,7 @@ function Vy_thu = Vy_thu(theta,n,u)
     
     %Vy_thu = .05*eye(n);
     
-    tau = 1/(n-1);
+    tau = 1/n;
     conv_u = zeros(1,n);
         
     for i = 1:n

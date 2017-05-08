@@ -11,8 +11,7 @@ function A = acceptance(thetatry,thetaprev,y,tau,T,P,n,rkhs_eigenfile,data_path)
     
     nTheta= length(thetatry);
     A=zeros(nTheta,1);
-    p_thetatry=1;
-    p_thetaprev=1;
+    p
     for i = 1:nTheta
         p_thetatry = p_theta(i,thetatry);
         p_thetaprev = p_theta(i,thetaprev);

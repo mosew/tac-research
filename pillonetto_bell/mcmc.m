@@ -7,14 +7,14 @@ data_path = 'none';
 % data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
-P = 10;   %number of eigenfunctions
+P = 6;   %number of eigenfunctions
 T = 1;
 n = 50;
 tau = 1/50;
 t = tau:tau:T;
-burnin = 150;
-K = 6000;
-alph = 50; % Adjusts the variance of the parameter estimate
+burnin = 200;
+K = 2000;
+alph = 49; % Adjusts the variance of the parameter estimate
 
 
 % w = warning('query','last');
@@ -82,13 +82,22 @@ progress=struct();
 
 
 while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
-        
-    c = unifrnd(0,1,nTheta,1); % Generates a uniform random number for each parameter
-        
-    while any(thetas(:,k)<=0)
-         thetas(:,k) = mvnrnd(thetas(:,k-1),alph*Vhat_);
+    if ~rem(k,100)
+        k
     end
-    
+
+    c = unifrnd(0,1,nTheta,1); % Generates a uniform random number for each parameter
+%     Vhat_ = Vhat(y,thetas(:,k-1),tau,P,T,n,eivs,rkhs_eigenfile,data_path);
+%     Vhat_ = (Vhat_ + Vhat_' ) / 2;
+% 
+%     if ~all(eigs(Vhat_)>0)
+%         fprintf('Vhat %i',k)
+%         eigs(Vhat_)
+%         pause
+%     end
+
+    thetas(:,k) = mvnrnd(thetas(:,k-1),alph*Vhat_);
+        
     try 
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     catch
@@ -96,21 +105,26 @@ while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITI
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     end
     
+    
+    
     for i = 1:nTheta
-        if c(i) > acc(i)
+        if c(i) > acc(i) || thetas(i,k)<=0
 %             [i,c(i),acc(i),thetas(i,k),thetas(i,k-1)]
 %             pause
             if k>burnin
                 rejected(i) = rejected(i) + 1;
-                fprintf('Rejected theta(%i) at %d \n',i,c(i));
+%                 fprintf('Rejected theta(%i) at %d \n',i,c(i));
             end
             thetas(i,k)=thetas(i,k-1);
+        else
+            Vhat_ = Vhat(y,thetas(:,k),tau,P,T,n,eivs,rkhs_eigenfile,data_path);
+            Vhat_ = (Vhat_ + Vhat_' ) / 2;
         end
     end
 
     if k<burnin
-        fprintf('Burnin step %i\n',k);
-        fprintf('theta(1)=%d, theta(2)=%d\n',thetas(1,k),thetas(2,k));
+%         fprintf('Burnin step %i\n',k);
+%         fprintf('theta(1)=%d, theta(2)=%d\n',thetas(1,k),thetas(2,k));
         k=k+1;
         continue
     end
@@ -122,12 +136,12 @@ while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITI
     
     a(:,k+1-burnin) = mvnrnd(mus,covs);
     
-    progress.step = k;
-    progress.theta1=[thetas(1,k-1),thetas(1,k)];
-    progress.theta2=[thetas(2,k-1),thetas(2,k)];
-    progress.acc1=acc(1);
-    progress.acc2=acc(2);
-    progress
+%     progress.step = k;
+%     progress.theta1=[thetas(1,k-1),thetas(1,k)];
+%     progress.theta2=[thetas(2,k-1),thetas(2,k)];
+%     progress.acc1=acc(1);
+%     progress.acc2=acc(2);
+%     progress
     
     
     k=k+1;

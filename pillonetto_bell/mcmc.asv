@@ -7,14 +7,14 @@ data_path = 'none';
 % data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
-P = 30;   %number of eigenfunctions
+P = 100;   %number of eigenfunctions
 T = 1;
 n = 50;
 tau = 1/50;
 t = tau:tau:T;
-burnin = 400;
-K = 3000;
-alph = 1600; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
+burnin = 100;
+K = 1000;
+alph = .1; % Adjusts the variance of the parameter estimate
 
 
 % w = warning('query','last');
@@ -94,7 +94,6 @@ while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITI
     try
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     catch
-        fprintf('Something went wrong with calculating acceptance ratio for this draw of theta: %d,%d.\n',thetas(1,k),thetas(2,k));
         thetas(:,k)=thetas(:,k-1);
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     end

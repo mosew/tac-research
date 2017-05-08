@@ -1,26 +1,17 @@
 function A = acceptance(thetatry,thetaprev,y,tau,T,P,n,rkhs_eigenfile,data_path)
     % Computes acceptance ratio of draw
-    % for theta_i, the i^th parameter
     % INPUT:
     % thetatry and thetaprev are nTheta x 1 vectors
     % 
     % OUTPUT:
-    % nTheta x 1 vector of numbers
+    % single number
     
     assert(length(thetatry)==length(thetaprev));
     
-    nTheta= length(thetatry);
-    A=zeros(nTheta,1);
-    p_thetatry=1;
-    p_thetaprev=1;
-    for i = 1:nTheta
-        p_thetatry = p_theta(i,thetatry);
-        p_thetaprev = p_theta(i,thetaprev);
-    end
-        num = p_y_given_theta(y,thetatry,tau,T,P,n,rkhs_eigenfile,data_path)*p_thetatry;
-        den = p_y_given_theta(y,thetaprev,tau,T,P,n,rkhs_eigenfile,data_path)*p_thetaprev;
-        A(i) = min(1, num/den);
-        %A(i) = exp( log(p_y_given_theta(y,thetatry,tau,T,P,n,rkhs_eigenfile,data_path))+log(p_thetatry) - log(p_y_given_theta(y,thetaprev,tau,T,P,n,rkhs_eigenfile,data_path))-log(p_thetaprev));
+    p_thetatry=p_theta(thetatry);
+    p_thetaprev=p_theta(thetaprev);
+    num = p_y_given_theta(y,thetatry,tau,T,P,n,rkhs_eigenfile,data_path)*p_thetatry;
+    den = p_y_given_theta(y,thetaprev,tau,T,P,n,rkhs_eigenfile,data_path)*p_thetaprev;
+    A = min(1, num/den);
 
-    end
 end

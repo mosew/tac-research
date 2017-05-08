@@ -1,21 +1,7 @@
-function p_theta = p_theta(i,theta)
+function p_theta = p_theta(theta)
     % this is for example 7.2 from the Pillonetto-Bell paper
+    % Returns number, joint prior probability for theta evaluated at theta
     
-    switch i
-        case 1
-            % p_theta = p_y_given_theta(y,theta,tau,T,P,rkhs_eigenfile,data_path);
-            % flat prior
+    p_theta = (theta(1)>0)*(theta(2)>0)*normpdf(theta(2),10,2)/(1-normcdf(-5,0,1));%*exp(-1000*theta(1));
 
-            if theta(1)<=0 || theta(1)>=15
-                p_theta = 0;
-            else
-                p_theta=1/15;
-            end
-        case 2
-            if theta(2)<=0
-                p_theta = 0;
-            else
-                p_theta=normpdf(theta(2),10,2);
-            end
-    end
 end

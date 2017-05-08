@@ -16,6 +16,8 @@ function output = L_i(theta,f,i,tau)
         fxg = @(s) feval(f,s).*feval(g,i*tau-s);
         output = integral(fxg,0,i*tau);
         
+        f = sumj=1 to P (proj_phij f)
+        
     else
         % if f is a numeric vector, it's encoding amplitudes of kernel eigenfunctions
         % In the below, it's assumed that T=1

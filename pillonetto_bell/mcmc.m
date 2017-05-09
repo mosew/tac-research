@@ -13,8 +13,8 @@ n = 50;
 tau = 1/50;
 t = tau:tau:T;
 burnin = 400;
-K = 3000;
-alph = 3700; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
+K = 8000;
+alph = 3500; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
 
 
 % w = warning('query','last');
@@ -81,9 +81,9 @@ rejected=0;
 progress=struct();
 
 
-while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
+while k<K
 
-    if ~rem(k,100)
+    if ~rem(k,500)
         k
     end
 
@@ -142,4 +142,4 @@ plot(sampled_u)
 
 % Scatterplot thetas
 figure
-scatter(thetas(1,burnin:end),thetas(2,burnin:end))
+scatter(thetas(1,burnin:end),thetas(2,burnin:end),'.')

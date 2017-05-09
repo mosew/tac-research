@@ -1,6 +1,5 @@
-function bool = converged(epsilon)
+function bool = converged(a,k,K,nEndingSteps,burnin,epsilon)
 
-    bool = condition(epsilon,T,lumF,lumC
 
 
     bool= (k>=K);

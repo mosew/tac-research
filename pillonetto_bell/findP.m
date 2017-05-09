@@ -1,14 +1,14 @@
-K = size(thetas,2)-burnoff;
+K = size(thetas,2)-burnin;
 gamma = 1.25;
 ths = thetas(:,1:K);
 
-P=60
+P=6
 Q = floor(gamma*P)+1;
 
 a=amps_from_th(P,K,ths,y,rkhs_eigenfile,T,n,tau,data_path);
 b=amps_from_th(Q,K,ths,y,rkhs_eigenfile,T,n,tau,data_path);
 
-[~,eifs] = get_kernel_eigenstuff(900,T,rkhs_eigenfile);
+[~,eifs] = get_kernel_eigenstuff(300,T,rkhs_eigenfile);
 fksCoarse = cell(P,1);
 fksFine = cell(Q,1);
 
@@ -58,6 +58,5 @@ while ~isPbigenough(fksCoarse,fksFine,T)
     plot(loFi(t),'r--')
     plot(hiFi(t),'r--')
     
-    pause
 end    
 P

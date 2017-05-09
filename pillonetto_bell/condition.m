@@ -1,6 +1,5 @@
 function bool = condition(epsilon,T,lumF,lumC,i)
 
-
     fiFsq = @(t) feval(lumF{i},t).^2;
     fiFminusfiCsq = @(t) (feval(lumF{i},t)-feval(lumC{i},t)).^2;
 

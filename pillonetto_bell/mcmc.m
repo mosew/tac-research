@@ -7,14 +7,14 @@ data_path = 'none';
 % data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
-P = 30;   %number of eigenfunctions
+P = 20;   %number of eigenfunctions
 T = 1;
 n = 50;
 tau = 1/50;
 t = tau:tau:T;
 burnin = 400;
 K = 3000;
-alph = 1600; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
+alph = 3700; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
 
 
 % w = warning('query','last');
@@ -42,7 +42,6 @@ a = zeros(P,K);
 
 
 %% Generate sample input
-% Base signal plus noise
 actual_u = pb_7p2_example_u() ;
 sampled_u = actual_u(t);
 
@@ -65,7 +64,8 @@ y = [7.88231656865881e-05,0.00103141481842703,0.00425993020130455,0.010941457281
 %plot(t,y)
 
 %% Generate parameter variance estimates 
-
+% I think technically this should be re-evaluated at the current draw of theta,
+% but I don't think it should vary all that much anyway.
 Vhat_ = Vhat(y,[1,10]',tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 Vhat_ = (Vhat_ + Vhat_' ) / 2;
 

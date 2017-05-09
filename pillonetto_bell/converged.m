@@ -1,4 +1,8 @@
-function bool = converged(a,k,K,nEndingSteps,burnoff,epsilon)
+function bool = converged(epsilon)
+
+    bool = condition(epsilon,T,lumF,lumC
+
+
     bool= (k>=K);
 %     if nEndingSteps<=0
 %         fprintf('nEndingSteps should be > 1')

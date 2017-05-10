@@ -7,14 +7,14 @@ data_path = 'none';
 % data_path = '030117_234splhr_fixedtraining_testeps15_arrays';
 
 %% Set hyperparameters
-P = 100;   %number of eigenfunctions
+P = 20;   %number of eigenfunctions
 T = 1;
 n = 50;
 tau = 1/50;
 t = tau:tau:T;
-burnin = 100;
-K = 1000;
-alph = .1; % Adjusts the variance of the parameter estimate
+burnin = 400;
+K = 8000;
+alph = 3450; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
 
 
 % w = warning('query','last');
@@ -35,14 +35,13 @@ thetas(2,1)= 10;
 
 
 % initialize empty arrays to hold amplitudes
-a = zeros(P,K);
+a = zeros(P,K-burnin);
 
 %% Get eigenvalues and eigenfunctions
 [eivs,eifs] = get_kernel_eigenstuff(P,T,rkhs_eigenfile);
 
 
 %% Generate sample input
-% Base signal plus noise
 actual_u = pb_7p2_example_u() ;
 sampled_u = actual_u(t);
 
@@ -65,7 +64,8 @@ y = [7.88231656865881e-05,0.00103141481842703,0.00425993020130455,0.010941457281
 %plot(t,y)
 
 %% Generate parameter variance estimates 
-
+% I think technically this should be re-evaluated at the current draw of theta,
+% but I don't think it should vary all that much.
 Vhat_ = Vhat(y,[1,10]',tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 Vhat_ = (Vhat_ + Vhat_' ) / 2;
 
@@ -81,9 +81,9 @@ rejected=0;
 progress=struct();
 
 
-while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITION NOT IMPLEMENTED
+while k<K
 
-    if ~rem(k,100)
+    if ~rem(k,500)
         k
     end
 
@@ -94,6 +94,7 @@ while ~converged(a,k,K,nEndingSteps,burnin,epsilon) %PAPER'S CONVERGENCE CONDITI
     try
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     catch
+        fprintf('Something went wrong with calculating acceptance ratio for this draw of theta: %d,%d.\n',thetas(1,k),thetas(2,k));
         thetas(:,k)=thetas(:,k-1);
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     end
@@ -133,12 +134,22 @@ end
 % MCMC acceptance rate for theta
 1-rejected/(k-burnin)
 
+fks = cell(1,K-burnin);
+for i = 1:K-burnin
+    fks{i} = f_from_a_eifs(a(:,i)',eifs);
+end
+fL_fU_fM = confidence_limits(fks);
+fL = fL_fU_fM{1};
+fU = fL_fU_fM{2};
+fM = fL_fU_fM{3};
 % Plot sample mean input function
-f = f_from_a_eifs(mean(a(:,1:(k-burnin)),2)',eifs);
-plot(f(t))
+
+plot(fM(t))
 hold on
 plot(sampled_u)
+plot(fL(t),'r-.')
+plot(fU(t),'r-.')
 
 % Scatterplot thetas
 figure
-scatter(thetas(1,burnin:end),thetas(2,burnin:end))
+scatter(thetas(1,burnin:end),thetas(2,burnin:end),'.')

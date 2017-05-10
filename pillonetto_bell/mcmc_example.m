@@ -14,7 +14,7 @@ tau = 1/50;
 t = tau:tau:T;
 burnin = 400;
 K = 8000;
-alph = 3450; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
+alph = 3333; % Adjusts the variance of the parameter draw; according to paper should be s.t. acceptance rate is .23
 
 
 % w = warning('query','last');
@@ -69,18 +69,12 @@ y = [7.88231656865881e-05,0.00103141481842703,0.00425993020130455,0.010941457281
 Vhat_ = Vhat(y,[1,10]',tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 Vhat_ = (Vhat_ + Vhat_' ) / 2;
 
-%% MCMC
-
-% Set parameters for the convergence condition.
-epsilon = 10^(-4);
-nEndingSteps=5;
-
-% Initialize steps
+%% Initialize steps
 k=2;
 rejected=0;
 progress=struct();
 
-
+%% Loop
 while k<K
 
     if ~rem(k,500)
@@ -90,7 +84,6 @@ while k<K
     % Restricted to be nonnegative
     thetas(:,k) = rmvnrnd(thetas(:,k-1),alph*Vhat_,1,[-1,0;0,-1],[0,0]');
     
-    % If anything goes wrong
     try
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     catch
@@ -99,7 +92,9 @@ while k<K
         acc = acceptance(thetas(:,k),thetas(:,k-1),y,tau,T,P,n,rkhs_eigenfile,data_path);
     end
     
-    c = unifrnd(0,1,1); % Generates a uniform random number
+    
+    c = unifrnd(0,1,1);
+    
     if c > acc
         if k>burnin
             rejected = rejected + 1;
@@ -138,17 +133,18 @@ fks = cell(1,K-burnin);
 for i = 1:K-burnin
     fks{i} = f_from_a_eifs(a(:,i)',eifs);
 end
+
 fL_fU_fM = confidence_limits(fks);
 fL = fL_fU_fM{1};
 fU = fL_fU_fM{2};
 fM = fL_fU_fM{3};
-% Plot sample mean input function
 
-plot(fM(t))
+
+plot(fM(t),'b')
 hold on
-plot(sampled_u)
-plot(fL(t),'r-.')
-plot(fU(t),'r-.')
+plot(sampled_u,'ko')
+plot(fL(t),'r--')
+plot(fU(t),'r--')
 
 % Scatterplot thetas
 figure

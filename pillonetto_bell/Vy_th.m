@@ -16,10 +16,13 @@ function Vy_th = Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path)
     % Data dependence
     if data_path == 'none'
         % Example 7.2 from P-B paper
-        u = pb_7p2_example_u();
-        
-        meas_noise = Vy_thu([exp(1),10],n,u);
-        u = u(0:tau:T);
+        try
+            load('7p2.mat','meas_noise')
+        catch
+            u = pb_7p2_example_u();
+            meas_noise = Vy_thu([1,10],n,u);
+            save('7p2.mat','meas_noise');
+        end
         
         
     else
@@ -41,7 +44,5 @@ function Vy_th = Vy_th(theta,P,T,n,tau,rkhs_eigenfile,data_path)
         end
     end
     Vy_th = Vy_th + meas_noise;
-%    Vy_th = Vy_th*(1.05)^2; % 5% CV noise.
-%    Vy_th = (Vy_th + Vy_th')/2;
     
 end

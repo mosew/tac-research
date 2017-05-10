@@ -10,12 +10,19 @@ function output = L_i(theta,f,i,tau)
     %
     % FOR EXAMPLE 7.2 OF PILLONETTO-BELL
     
-    g = @(s) exp(-theta(2)*s);
-    fxg = @(s) feval(f,s).*feval(g,i*tau-s);
-    output = integral(fxg,0,i*tau,'RelTol',1e-3);
+    if ~isnumeric(f)
+    
+        g = @(s) exp(-theta(2)*s);
+        fxg = @(s) feval(f,s).*feval(g,i*tau-s);
+        output = integral(fxg,0,i*tau);
+        
+    else
+        % if f is a numeric vector, it's encoding amplitudes of kernel eigenfunctions
+        % In the below, it's assumed that T=1
+        P = length(f);
+        w = pi/2*(2*(1:P)-1);
+        output = sum( f.*sqrt(2)./(theta(2)^2+w.^2) .* (theta(2)*sin(w*i*tau) - w.*(cos(w*i*tau)) + w.*(exp(-theta(2)*i*tau))));
+    end
 
-%     g_discrete = feval(g,tau*(0:(i-1)));
-%     f_discrete = feval(f,tau*(0:(i-1)));
-%     output = sum(conv(f_discrete,g_discrete,'same'));
     
 end

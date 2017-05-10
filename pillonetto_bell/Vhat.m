@@ -12,6 +12,5 @@ function Vhat = Vhat(y,thetaHat,tau,P,T,n,eivs,rkhs_eigenfile,data_path)
     H = d2logpy_th_ + d2logpth_;
     
     Vhat = -inv(H);
-    %Vhat = -diag(diag(inv(H)));
     
 end

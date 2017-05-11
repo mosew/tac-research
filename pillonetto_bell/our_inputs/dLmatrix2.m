@@ -8,9 +8,7 @@ function dLmatrix2 = dLmatrix2(theta,P,n,Lmatrix)
     
     load('operators.mat','dAN_dq1');
     
-    dLmatrix2 = zeros(P,n,nTheta);
-%     dLmatrix(:,:,1) = dAN_dq1*Lmatrix;
-    dLmatrix2(:,:,2) = Lmatrix/theta(2);
+    dLmatrix2 = Lmatrix/theta(2);
     
     
     

@@ -18,7 +18,7 @@ function dVy_th = dVy_th(theta,P,T,n,eivs,Lmatrix,dLmatrix)
     for i = 1:n
         for k = 1:n
             for r = 1:nTheta
-                dVy_th(i,k,r) = sum( deiv_(:,r).*Lmatrix(:,i).*Lmatrix(:,k) + eivs.*(dLmatrix(:,i,r).*Lmatrix(:,k)+Lmatrix(:,i).*dLmatrix(:,k,r))) ;
+                dVy_th(i,k,r) = sum( deiv_(:,r).*Lmatrix(:,i).*Lmatrix(:,k) + eivs.*(dLmatrix_(:,i,r).*Lmatrix(:,k)+Lmatrix(:,i).*dLmatrix_(:,k,r))) ;
             end
         end
     end

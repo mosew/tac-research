@@ -3,12 +3,12 @@ function infoTheta = infoTheta()
     % OUTPUT:
     % nTheta x nTheta
     
-    % For EXAMPLE 7.2 we assume that theta(1) and theta(2) are independent,
+    % For ROSEN TRANSDERMAL ALCOHOL MODEL we assume that theta(1) and theta(2) are independent,
     % so the Fisher information matrix is diagonal.
     
-    % theta(1)~exponential(1)? Jeffreys prior?
-    % theta(2)~N(10,2)
+    % theta(1)~N(4.4e-3,4e-4)
+    % theta(2)~N(1.23,0.1)
     
-    infoTheta = [0,0;0,0.25];
+    infoTheta = [1.6e-7,0;0,1e-2];
     
 end

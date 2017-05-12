@@ -23,7 +23,8 @@ function [Lmatrix_,dLmatrix1_,d2Lmatrix1_]=Lmatrix_and_dLmatrix1_and_d2Lmatrix1(
             output = integral(fxg,0,i*tau,'ArrayValued',true);
             
             Lmatrix_(j,i) = output(1);
-            doutput = dAN_dq1*output;
+            
+            doutput = (i*tau-1)*dAN_dq1*output;
             dLmatrix1_(j,i) = doutput(1);
             d2output = d2m*output;
             d2Lmatrix1_(j,i) = d2output(1);

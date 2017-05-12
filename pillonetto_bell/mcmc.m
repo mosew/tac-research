@@ -8,7 +8,7 @@ data_path = 'my_results';
 
 %% Set hyperparameters
 test_ep = 2;
-N = 16;   %space discretization
+N = 32;   %space discretization
 P = 6;   %number of eigenfunctions
 tau = 5;
 burnin = 1;
@@ -23,7 +23,7 @@ alph = 3333; % Adjusts the variance of the parameter draw; according to paper sh
 %% Generate initial theta
 
 % number of parameters
-nTheta=2;
+nTheta=3;
 
 % initialize empty arrays to hold parameter values
 thetas=zeros(nTheta,K);
@@ -31,7 +31,7 @@ thetas=zeros(nTheta,K);
 % Initial parameter guesses
 thetas(1,1)= .0044;
 thetas(2,1)= 1.23;
-
+thetas(3,1)=1;
 
 % initialize empty arrays to hold amplitudes
 a = zeros(P,K-burnin);
@@ -75,6 +75,9 @@ Vhat_ = Vhat(test_ep,N,y,[.0044,1.23]',tau,P,T,n,eivs,rkhs_eigenfile,data_path);
 Vhat_ = (Vhat_ + Vhat_' ) / 2;
 save('operators.mat','Vhat_');
 fprintf('Calculated Vhat\n');
+
+Vhat_
+pause
 
 %% Initialize steps
 k=2;

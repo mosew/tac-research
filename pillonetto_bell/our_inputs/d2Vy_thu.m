@@ -9,6 +9,4 @@ function d2Vy_thu = d2Vy_thu(theta,P,n)
     d2Vy_thu = zeros(n,n,nTheta,nTheta);     
     
     
-    
-    
 end

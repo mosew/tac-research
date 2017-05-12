@@ -15,10 +15,15 @@ function d2logpy_th = d2logpy_th(test_ep,N,y,theta,tau,P,T,n,eivs,rkhs_eigenfile
     
     [Lmatrix_,dLmatrix_(:,:,1),d2Lmatrix_(:,:,1,1)] = Lmatrix_and_dLmatrix1_and_d2Lmatrix1(N,theta,P,T,rkhs_eigenfile,n,tau);
     dLmatrix_(:,:,2) = dLmatrix2(theta,P,n,Lmatrix_);
+    dLmatrix_(:,:,3) = Lmatrix_/theta(3);
+    
     d2Lmatrix_(:,:,1,2) = dLmatrix_(:,:,1)/theta(2);
     d2Lmatrix_(:,:,2,1) = d2Lmatrix_(:,:,1,2);
+    d2Lmatrix_(:,:,1,3) = dLmatrix_(:,:,1)/theta(3);
+    d2Lmatrix_(:,:,3,1) = d2Lmatrix_(:,:,1,3);
+    d2Lmatrix_(:,:,2,3) = dLmatrix_(:,:,2)/theta(3);
+    d2Lmatrix_(:,:,3,2) = d2Lmatrix_(:,:,2,3);
 
-    
     assert(size(y,1)==1);
     
     s2 = d2Vy_th(theta,P,T,n,eivs,Lmatrix_,dLmatrix_,d2Lmatrix_);

@@ -8,7 +8,8 @@ function infoTheta = infoTheta()
     
     % theta(1)~N(4.4e-3,4e-4)
     % theta(2)~N(1.23,0.1)
+    % theta(3)~flat
     
-    infoTheta = [1.6e-7,0;0,1e-2];
+    infoTheta = [1.6e-7,0 0;0,1e-2,0;0,0,0];
     
 end

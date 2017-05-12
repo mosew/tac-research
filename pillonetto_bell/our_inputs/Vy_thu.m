@@ -1,7 +1,6 @@
 function Vy_thu = Vy_thu(theta,n,u_total)
     % GOTTA FIGURE THIS OUT FOR ROSEN TRANSDERMAL ALCOHOL MODEL
-    % Right now it is the sample covariance of u_total, excluding the test
-    % episode.
+    
     Vy_thu = cov(u_total);
     
 %     tau = 1/n;

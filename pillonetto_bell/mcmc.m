@@ -2,7 +2,7 @@
 rng(3);
 
 %% Set RKHS
-rkhs_eigenfile = 'green1_eigen';
+rkhs_eigenfile = 'haarwavelet_eigen';
 % data_path = 'none';
 data_path = 'my_results';
 
@@ -31,7 +31,7 @@ thetas=zeros(nTheta,K);
 % Initial parameter guesses
 thetas(1,1)= .0044;
 thetas(2,1)= 1.23;
-thetas(3,1)=1;
+thetas(3,1)= 1;
 
 % initialize empty arrays to hold amplitudes
 a = zeros(P,K-burnin);

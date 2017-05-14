@@ -1,0 +1,5 @@
+function [eiv,eif] = haarwavelet_eigen(j,k,T)
+    c = 2;
+    eiv = @(th) th(3)/c^(2*j);
+    eif = @(s) c^(j/2)*;
+end

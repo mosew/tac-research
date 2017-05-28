@@ -2,6 +2,7 @@
 class PB(object):
 
     def __init__(self,parabolic_system):
+
         self.data_path = None
         self.P = 20
         self.T = 1
@@ -20,7 +21,10 @@ class PB(object):
         self.a = np.zeros((self.P, self.K - self.burnin))
 
         from rkhs import Green1_eigen
-        g = Green1_eigen(self.P,self.T,self.thetas[:,0])
+        self.g = Green1_eigen(self.P,self.T,self.thetas[:,0])
+
+        from numpy.linalg import inv
+        self.vhat = - inv(self.d2logpy_th() - self.infoTheta())
 
         self.y = np.array([7.88231656866e-05, 0.00103141481843, 0.0042599302013, 0.0109414572813, 0.0216727450029, 0.0363139318338,
             0.0542174735416, 0.0742698619535, 0.0952090587957, 0.115750968435, 0.134715310806, 0.151123127707,
@@ -35,23 +39,111 @@ class PB(object):
     def set_y(self,y):
         self.y = y
 
-    def plot_u_vs_y(self,u,y):
-        from matplotlib import pyplot as plt
 
+    def p_y_given_theta(self):
+        v = self.Vy_th()
+        p_y_given_th = mvnpdf(y, 0, (v + v.T) / 2)
+        return p_y_given_th
 
-    # plot(t,y)
+    def compute_L_i(self,theta,f):
+        from sympy import *
+        x = symbols("x")
+        h = exp(-theta[2]*x)
+        return integrate
 
-    ## Generate parameter variance estimates
-    # I think technically this should be re-evaluated at the current draw of theta,
-    # but I don't think it should vary all that much.
-    Vhat_=Vhat( y ,cat(1, 10).T, tau,P, T,n, eivs, rkhs_eigenfile,data_path )
-    # pillonetto_bell/src/mcmc.m:72
+    def set_d012_Lmatrix(self):
+
+        pass
+
+    def set_dVy_th(self,theta):
+        import numpy as np
+        self.g.set_theta(theta)
+        self.set_d012_Lmatrix()
+
+        self.dVy_th = np.zeros((self.n, self.n, self.nTheta))
+
+        for i in range(1, self.n+1):
+            for k in range(1, self.n+1):
+                for r in range(1, self.nTheta+1):
+                    self.dVy_th[i, k, r] = sum(np.multiply(np.multiply(self.g.deivs[:, r], Lmatrix[:, i]), Lmatrix[:, k]) + multiply(eivs,
+                                                                                                                   (
+                                                                                                                   multiply(
+                                                                                                                       dLmatrix_[
+                                                                                                                       :,
+                                                                                                                       i,
+                                                                                                                       r],
+                                                                                                                       Lmatrix[
+                                                                                                                       :,
+                                                                                                                       k]) + multiply(
+                                                                                                                       Lmatrix[
+                                                                                                                       :,
+                                                                                                                       i],
+                                                                                                                       dLmatrix_[
+                                                                                                                       :,
+                                                                                                                       k,
+                                                                                                                       r]))))
+                    # pillonetto_bell/src/dVy_th.m:22
+
+        dVy_th = dVy_th + dVy_thu(theta, P, n)
+        # pillonetto_bell/src/dVy_th.m:27
+        return dVy_th
+
+    def set_d2Vy_th(self,theta):
+        self.g.set_theta(theta)
+        self.g.deivs = self.g.deiv(theta)
+        self.g.d2eivs = self.g.d2eiv(theta)
+        self.set_d2Lmatrix(theta)
+        self.d2Vy_th = np.zeros((self.n, self.n, self.nTheta, self.nTheta))
+
+        for i in range(1, self.n + 1).reshape(-1):
+            for k in range(1, self.n + 1).reshape(-1):
+                for s in range(self.nTheta).reshape(-1):
+                    for r in range(self.nTheta).reshape(-1):
+                        self.d2Vy_th[i, k, s, r] = sum(
+                            multiply(multiply(self.d2eivs[:, s, r], Lmatrix[:, i]), Lmatrix[:, k]) + multiply(deivs[:, r], (
+                            multiply(dLmatrix[:, i, s], Lmatrix[:, k]) + multiply(Lmatrix[:, i],
+                                                                                  dLmatrix[:, k, s]))) + multiply(
+                                deivs[:, s], (multiply(dLmatrix[:, i, r], Lmatrix[:, k]) + multiply(Lmatrix[:, i],
+                                                                                                    dLmatrix[:, k,
+                                                                                                    r]))) + multiply(
+                                eivs, (multiply(d2Lmatrix_[:, i, s, r], Lmatrix[:, k]) + multiply(Lmatrix[:, i],
+                                                                                                  d2Lmatrix_[:, k, s,
+                                                                                                  r]) + multiply(
+                                    dLmatrix[:, i, s], dLmatrix[:, k, r]) + multiply(dLmatrix[:, i, r],
+                                                                                     dLmatrix[:, k, s]))))
+
+        self.d2Vy_th += self.d2Vy_thu(theta)
+
+    def set_d2logpy_th(self,theta):
+        import numpy as np
+
+        assert(self.y.shape[0] == 1)
+
+        self.set_d2Vy_th(theta)
+        s2 = self.d2Vy_th(theta)
+        self.set_dVy_th(theta)
+        s1 = self.dVy_th(theta)
+        self.set_Vy_th(theta)
+        s0 = self.Vy_th()
+
+        self.d2logpy_th = np.zeros(self.nTheta, self.nTheta)
+
+        for s in range(1, self.nTheta + 1).reshape(-1):
+            for r in range(1, self.nTheta + 1).reshape(-1):
+                self.d2logpy_th[s, r] = - 0.5 * (np.trace(np.linalg.solve(s0, (s2[:, :, s, r]))) -
+                                            np.trace(np.dot(np.linalg.solve(s0, (s1[:, :, s] / s0)), s1[:, :, r])) +
+                                            np.dot(np.dot(
+                                                self.y, (np.linalg.solve(s0, (np.dot(s1[:, :, s] / s0, s1[:, :, r]) -
+                                                                              s2[:, :, s, r] + np.dot(s1[:, :, r] / s0, s1[:, :, s]))) / s0)), self.y.T))
+
+    Vhat_= Vhat( y ,cat(1, 10).T, tau, P, T,n, eivs, rkhs_eigenfile, data_path )
     Vhat_=(Vhat_ + Vhat_.T) / 2
-    # pillonetto_bell/src/mcmc.m:73
+
     ## Initialize steps
     k=2 # pillonetto_bell/src/mcmc.m:76
     rejected=0 # pillonetto_bell/src/mcmc.m:77
     progress=struct() # pillonetto_bell/src/mcmc.m:78
+
     ## Loop
     while k < K:
 

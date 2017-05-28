@@ -13,8 +13,12 @@ class Green1_eigen(object):
         self.P = P
         self.T = T
         self.theta = theta
-        self.eivs = list(P)
         self.eifs = list(P)
+
+        import numpy as np
+        self.eivs = np.zeros(P)
+        self.deivs = np.zeros(P)
+        self.d2eivs = np.zeros(P)
 
         from math import pi, sqrt, sin
         from sympy import symbols, lambdify
@@ -23,7 +27,11 @@ class Green1_eigen(object):
         for j in range(1, self.P + 1):
             self.eivs[j] = self.theta[0] * (self.T ** 2) / (((j - 1) * pi) + pi / 2) ** 2
             self.eifs[j] = lambdify(s, sqrt(2 / self.T) * sin((s / self.T) * (j * pi - pi / 2)), "numpy")
+            self.deivs[j] = (self.T ** 2) / (((j - 1) * pi) + pi / 2) ** 2
+            self.d2eivs[j] = 0
 
     def set_theta(self,theta):
         for j in range(1,self.P + 1):
             self.eivs[j] = theta[0] * (self.T ** 2) / (((j - 1) * pi) + pi / 2) ** 2
+            self.deivs[j] = (self.T ** 2) / (((j - 1) * pi) + pi / 2) ** 2
+            self.d2eivs[j] = 0

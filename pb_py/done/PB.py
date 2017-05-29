@@ -36,7 +36,7 @@ class PB(object):
         self.vy_thu = np.zeros((self.n,self.n))
         self.dvy_thu = np.zeros((self.n,self.n,self.nTheta))
         self.d2vy_thu = np.zeros((self.n,self.n,self.nTheta,self.nTheta))
-        self.d2logpy_th = np.zeros(self.nTheta, self.nTheta)
+        self.d2logpy_th = np.zeros((self.nTheta, self.nTheta))
 
 
         from rkhs import Green1_eigen
@@ -89,7 +89,6 @@ class PB(object):
 
     def p_y_given_theta(self,theta):
         from numpy.random import multivariate_normal
-        self.set_vy_th(theta)
         p_y_given_th = multivariate_normal(self.y, 0, (self.vy_th + self.vy_th.T) / 2)
         return p_y_given_th
 
@@ -110,7 +109,7 @@ class PB(object):
 
     def EV_aP_given_theta_y(self):
         import numpy as np
-        EV = list(2)
+        EV = [None, None]
         EV[0] = np.dot(np.dot(np.diag(self.g.eivs), self.lmatrix.T / self.vy_th), self.y.T)
         EV[1] = np.diag(self.g.eivs) - np.dot(np.dot(np.dot(np.diag(self.g.eivs), self.lmatrix.T), (np.linalg.solve(self.vy_th, self.lmatrix))), np.diag(self.g.eivs))
         EV[1] = (EV[1] + EV[1].T) / 2
@@ -140,8 +139,6 @@ class PB(object):
 
     def set_dvy_th(self,theta):
         import numpy as np
-        self.g.set_theta(theta)
-        self.set_d012_lmatrix(theta)
         for i in range(self.n):
             for k in range(self.n):
                 for r in range(self.nTheta):
@@ -158,10 +155,6 @@ class PB(object):
 
     def set_d2vy_th(self,theta):
         import numpy as np
-        self.g.set_theta(theta)
-        self.set_d012_lmatrix(theta)
-        self.d2vy_th = np.zeros((self.n, self.n, self.nTheta, self.nTheta))
-
         for i in range(self.n):
             for k in range(self.n):
                 for s in range(self.nTheta):
@@ -195,18 +188,10 @@ class PB(object):
 
     def set_d2logpy_th(self,theta):
         import numpy as np
-
         assert(self.y.shape[0] == 1)
-
-        self.set_d2vy_th(theta)
         s2 = self.d2vy_th
-        self.set_dvy_th(theta)
         s1 = self.dvy_th
-        self.set_vy_th(theta)
         s0 = self.vy_th
-
-        self.d2logpy_th = np.zeros(self.nTheta, self.nTheta)
-
         for s in range(self.nTheta):
             for r in range(self.nTheta):
                 self.d2logpy_th[s, r] = - 0.5 * (np.trace(np.linalg.solve(s0, (s2[:, :, s, r]))) -
@@ -221,72 +206,79 @@ class PB(object):
         self.vhat = - inv(self.d2logpy_th - self.infoTheta)
         self.vhat = 0.5 * (self.vhat + self.vhat.T)
 
+    def calculate_new_operators(self,theta):
+        self.g.set_theta(theta)
+        self.set_vy_thu(theta)
+        self.set_dvy_thu(theta)
+        self.set_d2vy_thu(theta)
+        self.set_d012_lmatrix(theta)
+        self.set_vy_th(theta)
+        self.set_dvy_th(theta)
+        self.set_d2vy_th(theta)
+        self.set_d2logpy_th(theta)
 
+
+    def plot_mcmc_results(self):
+        fks = cell(1, K - burnin)
+
+        # pillonetto_bell/src/mcmc.m:136
+        for i in arange(1, K - burnin).reshape(-1):
+            fks[i] = f_from_a_eifs(a[:, i].T, eifs)  # pillonetto_bell/src/mcmc.m:138
+
+        fL_fU_fM = confidence_limits(fks)  # pillonetto_bell/src/mcmc.m:141
+        fL = fL_fU_fM[1]
+        # pillonetto_bell/src/mcmc.m:142
+        fU = fL_fU_fM[2]
+        # pillonetto_bell/src/mcmc.m:143
+        fM = fL_fU_fM[3]
+        # pillonetto_bell/src/mcmc.m:144
+        plot(fM[t], 'b')
+        hold('on')
+        plot(sampled_u, 'ko')
+        plot(fL[t], 'r--')
+        plot(fU[t], 'r--')
+        # Scatterplot thetas figure
+        scatter(thetas[1, burnin:end()], thetas[2, burnin:end()], '.')
 
 
 
 if __name__ == "__main__":
 
-    from scipy.stats import norm,truncnorm
+    from scipy.stats import norm,truncnorm,multivariate_normal
     import numpy as np
 
     pb = PB()
 
+    rejected = 0
     ## Loop
     while pb.k < pb.K:
 
-        if logical_not(pb.k % 500):
-            k
+        if (pb.k % 500) != 0:
+            print pb.k
 
         # Restricted to be nonnegative
+        pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1] + np.sqrt(pb.alph) * np.linalg.cholesky(pb.vhat) * truncnorm.rvs(0,np.Infinity, size = pb.nTheta) # pillonetto_bell/src/mcmc.m:88
+        pb.calculate_new_operators( pb.thetas[:, pb.k] )
 
-        pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1] + truncnorm.rvs(pb.alph * pb.vhat) # pillonetto_bell/src/mcmc.m:88
         try:
-            acc=acceptance(thetas[:,k],thetas[:,k - 1] , y,tau,T,P,n, rkhs_eigenfile, data_path) # pillonetto_bell/src/mcmc.m:91
+            acc=pb.acceptance( pb.thetas[:, pb.k],pb.thetas[:, pb.k - 1] )
         finally:
             pass
-        c=unifrnd(0,1,1) # pillonetto_bell/src/mcmc.m:100
+
+        c=np.random.uniform(0,1,1)
         if c > acc :
-            if k > burnin:
-                rejected=rejected + 1
-            # pillonetto_bell/src/mcmc.m:104
-            thetas[:,k]=thetas[:,k - 1]
-        # pillonetto_bell/src/mcmc.m:106
-        if k < burnin:
-            k=k + 1
-            # pillonetto_bell/src/mcmc.m:110
+            if pb.k > pb.burnin:
+                rejected += 1
+            pb.thetas[:, pb.k]=pb.thetas[:, pb.k - 1]
+        if pb.k < pb.burnin:
+            pb.k += 1
             continue
-        EV=EV_aP_given_theta_y(thetas[:,k],y,rkhs_eigenfile,P,T,n,tau, data_path) # pillonetto_bell/src/mcmc.m:114
-        mus= EV [1 ]
-        # pillonetto_bell/src/mcmc.m:116
-        covs=EV[2] # pillonetto_bell/src/mcmc.m:117
-        a[:,k + 1 - burnin]=mvnrnd( mus,covs)
-        # pillonetto_bell/src/mcmc.m:119 #     progress.step = k; #     progress.theta1=[thetas(1,k-1),thetas(1,k)];
-        #     progress.theta2=[thetas(2,k-1),thetas(2,k)];
-        #     progress.acc1=acc(1);
-        #     progress.acc2=acc(2);
-        #     progress
-        k=k + 1
-    # pillonetto_bell/src/mcmc.m:129
+
+        EV=pb.EV_aP_given_theta_y( pb.thetas[:, pb.k] ) # This shouldn't have an argument. Must check that the current value of theta agrees with the would-be argument
+        pb.a[:, pb.k + 1 - pb.burnin] = multivariate_normal(EV[0],EV[1])
+        pb.k += 1
 
 
     # MCMC acceptance rate for theta
-    1 - rejected / (k - burnin)
-    fks=cell(1,K - burnin)
-    # pillonetto_bell/src/mcmc.m:136
-    for i in arange(1,K - burnin).reshape(-1):
-        fks[i]=f_from_a_eifs(a[:,i].T,eifs) # pillonetto_bell/src/mcmc.m:138
+    print "Acceptance rate: " + 1 - rejected / (pb.k - pb.burnin)
 
-    fL_fU_fM=confidence_limits(fks) # pillonetto_bell/src/mcmc.m:141
-    fL=fL_fU_fM[1]
-    # pillonetto_bell/src/mcmc.m:142
-    fU=fL_fU_fM[2]
-    # pillonetto_bell/src/mcmc.m:143
-    fM= fL_fU_fM[3]
-    # pillonetto_bell/src/mcmc.m:144
-    plot(fM [ t],'b')
-    hold('on')
-    plot(sampled_u,'ko') plot(fL[t ],'r--')
-    plot(fU[t],'r--')
-    # Scatterplot thetas figure
-    scatter(thetas[1,burnin:end()],thetas [2,burnin:end()],'.')

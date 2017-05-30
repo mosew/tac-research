@@ -8,17 +8,16 @@ class Parabolic_System(object):
         self.q2 = 1.
         self.q1 = .004
         self.n = int(self.T/self.tau)
+        self.m = 0 # number of training episodes
 
         import numpy as np
-        self.u_total = np.ones((3,self.n))
+        self.u_total = np.zeros((self.m+1,self.n))
         # Here the test episode should have row index 0, not m+1
         self.y_total = None
         self.BN = None
 
-
     def build_final_matrices(self):
         import numpy as np
-
         N = self.N
         a = np.ones(N)
         d = 4*np.ones(N-1)
@@ -33,6 +32,9 @@ class Parabolic_System(object):
         self.K = np.array(N * ( np.diag(-np.ones(N),k=-1) + np.diag(d/2) + np.diag(-np.ones(N),k=1)), dtype=float )
         assert(isinstance(self.K,np.ndarray))
         assert(self.K.shape == (self.N+1,self.N+1))
+
+        self.CNhat = np.zeros((1,self.N+1))
+        self.CNhat[0] = 1
 
     def build_Kq(self):
 
@@ -65,22 +67,24 @@ class Parabolic_System(object):
         from scipy.linalg import expm
 
         self.dAN_dq1=np.linalg.solve(- self.M,self.K)
-        
-        ANhat_and_dANhatdqM=expm(self.tau * np.concatenate( (np.concatenate( (self.AN, self.dAN_dq1),axis=1), np.concatenate( (np.zeros((self.N+1,self.N+1)),self.AN), axis=1) ), axis=0 ))
 
-        self.ANhat=ANhat_and_dANhatdqM[(self.N + 1):, (self.N + 1):]
-        self.dANhat_dq1=ANhat_and_dANhatdqM[:(self.N + 1),(self.N + 1):]
+        z = np.zeros((self.N + 1, self.N + 1))
+        r = np.concatenate( (self.AN, self.dAN_dq1), axis = 1)
+        d012ANhat_q1=expm(self.tau * np.concatenate( (np.concatenate( ((np.concatenate((r,z),axis = 1)), np.concatenate((z,r),axis=1)), axis = 0 ), np.concatenate((np.concatenate((z,z),axis=1),self.AN),axis=1)), axis = 0))
+
+        self.ANhat=d012ANhat_q1[(self.N + 1):, (self.N + 1):]
+        assert(self.ANhat.shape == (self.N+1,self.N+1))
+        self.dANhat_dq1=d012ANhat_q1[:(self.N + 1),(self.N + 1):(2*self.N + 3)]
+        assert(self.dANhat_dq1.shape == (self.N+1,self.N+1))
+        self.d2ANhat_d2q1=d012ANhat_q1[(2*self.N+2):,(2*self.N+2):]
+        assert(self.d2ANhat_d2q1.shape == (self.N+1,self.N+1))
         self.dANhat_dq2=np.zeros((self.N+1,self.N+1))
 
 
 
     def build_dBNhat_dq(self):
         import numpy as np
-
-        outp = np.concatenate((np.zeros(self.n),[1]))
-
-        # FIGURE THIS OUT FROM THE MATH
-        self.dBNhat_dq1 = self.BNhat
+        self.dBNhat_dq1 = self.dANhat_dq1 - np.dot((self.ANhat - np.identity(self.N+1)*np.linalg.solve(self.AN, self.dAN_dq1)) * np.linalg.solve((self.AN, self.BN)))
         self.dBNhat_dq2 = self.BNhat/self.q2
 
 

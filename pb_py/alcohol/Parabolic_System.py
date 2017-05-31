@@ -1,12 +1,12 @@
 class Parabolic_System(object):
 
-    def __init__(self):
+    def __init__(self,q1=.0046,q2=1.23):
 
         self.N = 32
         self.tau = 5.
         self.T = 276
-        self.q2 = 1.
-        self.q1 = .004
+        self.q2 = q2
+        self.q1 = q1
         self.n = int(self.T/self.tau)
         self.m = 0 # number of training episodes
 
@@ -15,6 +15,9 @@ class Parabolic_System(object):
         # Here the test episode should have row index 0, not m+1
         self.y_total = None
         self.BN = None
+        self.CNhat = np.zeros((1,self.N+1))
+        self.CNhat[0] = 1
+
 
     def build_final_matrices(self):
         import numpy as np
@@ -24,7 +27,7 @@ class Parabolic_System(object):
         d = np.concatenate(([2],d))
         d = np.concatenate((d,[2]))
 
-        self.M = np.array( 1/(6*float(N)) * (np.diag(a,k=-1) + np.diag(d) + np.diag(a,k=1) ), dtype=float)
+        self.M = np.array( 1/(6*float(N)) * (np.diag(a, k=-1) + np.diag(d) + np.diag(a, k=1)), dtype=float)
 
         assert(isinstance(self.M,np.ndarray))
         assert(self.M.shape == (self.N+1,self.N+1))
@@ -33,8 +36,6 @@ class Parabolic_System(object):
         assert(isinstance(self.K,np.ndarray))
         assert(self.K.shape == (self.N+1,self.N+1))
 
-        self.CNhat = np.zeros((1,self.N+1))
-        self.CNhat[0] = 1
 
     def build_Kq(self):
 
@@ -72,9 +73,9 @@ class Parabolic_System(object):
         r = np.concatenate( (self.AN, self.dAN_dq1), axis = 1)
         d012ANhat_q1=expm(self.tau * np.concatenate( (np.concatenate( ((np.concatenate((r,z),axis = 1)), np.concatenate((z,r),axis=1)), axis = 0 ), np.concatenate((np.concatenate((z,z),axis=1),self.AN),axis=1)), axis = 0))
 
-        self.ANhat=d012ANhat_q1[(self.N + 1):, (self.N + 1):]
+        self.ANhat=d012ANhat_q1[:(self.N + 1), :(self.N + 1)]
         assert(self.ANhat.shape == (self.N+1,self.N+1))
-        self.dANhat_dq1=d012ANhat_q1[:(self.N + 1),(self.N + 1):(2*self.N + 3)]
+        self.dANhat_dq1=d012ANhat_q1[:(self.N + 1),(self.N + 1):(2*self.N + 2)]
         assert(self.dANhat_dq1.shape == (self.N+1,self.N+1))
         self.d2ANhat_d2q1=d012ANhat_q1[(2*self.N+2):,(2*self.N+2):]
         assert(self.d2ANhat_d2q1.shape == (self.N+1,self.N+1))
@@ -125,7 +126,6 @@ class Parabolic_System(object):
             Phi[:, :, i] = self.gen_varphi(us[i, :])
 
         self.Phi = Phi
-
     
     def define_operators(self,us=None):
 
@@ -135,7 +135,7 @@ class Parabolic_System(object):
         self.build_BN()
         self.build_expm_stuff()
         self.build_BNhat()
-        self.build_Phi(us)
+        #self.build_Phi(us)
 
 
 if __name__ == '__main__':

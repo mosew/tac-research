@@ -13,7 +13,7 @@ class Green1_eigen(object):
         self.P = P
         self.T = T
         self.theta = theta
-        self.eifs = [None] * P
+        self.eifs = [0.0] * P
 
         import numpy as np
         self.eivs = np.zeros(P)

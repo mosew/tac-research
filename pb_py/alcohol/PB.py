@@ -16,10 +16,11 @@ class PB(object):
         import numpy as np
         self.infoTheta = np.array([[0, 0, 0],[1.6e-7, 0, 0],[0, 1e-2, 0]])
         self.thetas = np.zeros((self.nTheta, self.K))
-        self.thetas[:, 0] = [1., 1., 1.]
+        self.thetas[:, 0] = [5., 1., 1.]
         self.t = np.linspace(self.tau, self.T, self.n)
-        self.a = np.zeros((self.P, self.K - self.burnin))
-        self.ys = np.zeros((self.n, self.K - self.burnin))
+        self.a = np.zeros((self.P, self.K))
+        self.ys = np.zeros((self.n, self.K))
+        self.us = np.zeros((self.n, self.K))
         self.y = np.zeros(self.n)
 
         # Important matrices to be calculated
@@ -38,9 +39,9 @@ class PB(object):
         from rkhs import Green1_eigen
         self.g = Green1_eigen(self.P,self.T,self.thetas[:, 0])
 
-        # This is used for the initial calculation of V(y|theta, u) and its derivatives wrt theta. It should be such that the operators are nonsingular.
+        # This is used for the initial calculation of V(y|theta, u) and its derivatives wrt theta. It should be such that the initial operators are nonsingular.
         from scipy.stats import exponnorm
-        self.u = lambda x: 100.*exponnorm.pdf(x, 0.5)
+        self.us[:, 0] = [exponnorm.pdf((x-10.)/20., 0.5) for x in np.arange(self.tau, (self.n + 1)*self.tau, self.tau)]
 
         from Parabolic_System import Parabolic_System
         self.Z = Parabolic_System(self.thetas[1,0],self.thetas[2,0])
@@ -60,9 +61,9 @@ class PB(object):
                                                         self.Z.BNhat)
                                                  )
 
-    def recalculate_kernel(self,q1,q2):
+    def recalculate_kernel(self,theta):
         from Parabolic_System import Parabolic_System
-        self.Z = Parabolic_System(q1,q2)
+        self.Z = Parabolic_System(theta[1],theta[2])
         self.Z.define_operators()
 
         self.conv_kernel = lambda x: np.dot(self.Z.CNhat, np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau))), self.Z.BNhat))
@@ -79,25 +80,30 @@ class PB(object):
                                                         self.Z.BNhat)
                                                  )
 
+
     # Convolution kernel
-    def compute_L_i(self,theta,f,i):
+    def compute_L_i(self, theta, f, i):
         import numpy as np
         i+=1 # indexing in Python for i starts at 0 but we need it to start at 1. All signals have value 0 at t=0.
         if type(f) is np.ndarray:
-            fsamp = f
+            fsamp = f[:i]
         else:
-            fsamp = np.array([f(x) for x in np.arange(1, i*self.tau,self.tau)])
+            fsamp = np.array([f(x) for x in np.arange(1, i * self.tau, self.tau)])
         kernelsamp = np.array([self.conv_kernel(x) for x in np.arange(1, i * self.tau, self.tau)]).reshape(i)
-        return np.sum([fsamp[j]*kernelsamp[i-j-2] for j in range(i)])
+        return np.sum([fsamp[j]*kernelsamp[i-j-1] for j in range(i)])
 
     def convolve_eifs(self,theta):
+        import numpy as np
         convolved_eifs = np.zeros((self.P,self.n))
         for i in range(self.n):
             for j in range(self.P):
-                e_j = np.zeros(self.P)
-                e_j[j] = 1
                 convolved_eifs[j, i] = self.compute_L_i(theta, self.g.eifs[j], i)
+                # print j, i, convolved_eifs[j, i]
         return convolved_eifs
+
+    def f_from_amp(self,amp):
+        import numpy as np
+        return lambda x: np.dot(amp, np.array([self.g.eifs[j](x) for j in range(amp.shape[0])]))
 
     # MCMC help
     def p_y_given_theta(self,theta,y):
@@ -108,6 +114,7 @@ class PB(object):
 
     def p_theta(self,theta):
         from scipy.stats import truncnorm
+        import numpy as np
         return truncnorm.pdf(theta[1], 0, np.Infinity, 0.0046, 0.0006) * truncnorm.pdf(theta[2],0, np.Infinity, 1.23, 0.12)
 
     def acceptance(self,thetatry,thetaprev,y):
@@ -117,15 +124,18 @@ class PB(object):
         den = self.p_y_given_theta(thetaprev,y) * p_thetaprev
         return min(1, num / den)
 
-    def EV_aP_given_theta_y(self,y):
-        EV = [None, None]
-        EV[0] = np.dot(np.dot(np.diag(self.g.eivs), self.lmatrix.T / self.vy_th), y.T)
-        EV[1] = np.diag(self.g.eivs) - np.dot(np.dot(np.dot(np.diag(self.g.eivs), self.lmatrix.T), (np.linalg.solve(self.vy_th, self.lmatrix))), np.diag(self.g.eivs))
-        EV[1] = (EV[1] + EV[1].T) / 2
-        return EV
+    def mean_cov_aP_given_theta_y(self,y):
+        import numpy as np
+        mean = np.dot(np.diag(self.g.eivs), np.dot(self.lmatrix, np.linalg.solve(self.vy_th, y)))
+        cov = np.diag(self.g.eivs) - np.dot(np.dot(np.dot(np.diag(self.g.eivs), self.lmatrix),
+                                                   np.linalg.solve(self.vy_th, self.lmatrix.T)),
+                                            np.diag(self.g.eivs))
+        cov = (cov + cov.T) / 2
+        return mean, cov
 
     # Set values of matrices needed for MCMC
     def set_d012_lmatrix(self,theta):
+        import numpy as np
         self.lmatrix = self.convolve_eifs(theta)
         dkernsamp = np.array([self.dconv_kernel_th1(k*self.tau) for k in range(self.n)]).reshape(self.n)
         d2kernsamp = np.array([self.d2conv_kernel_th1(k*self.tau) for k in range(self.n)]).reshape(self.n)
@@ -140,24 +150,32 @@ class PB(object):
         self.d2lmatrix[:, :, 2, 1] = self.d2lmatrix[:, :, 1, 2]
 
     def set_vy_thu(self,theta,u):
+        import numpy as np
         for i in range(self.n):
-            self.vy_thu[i, i] = (0.1 * self.compute_L_i(theta,u,i)) ** 2
+            self.vy_thu[i, i] = theta[0]**2
+        self.vy_thu = np.array(self.vy_thu)
 
     def set_dvy_thu(self,theta,u):
-        pass
+        import numpy as np
+        for i in range(self.n):
+            self.dvy_thu[i, i, 0] = 2*theta[0]
+        self.dvy_thu = np.array(self.dvy_thu)
 
     def set_d2vy_thu(self,theta,u):
-        pass
+        import numpy as np
+        self.d2vy_thu[:, :, 0, 0] = 2 * np.identity(self.n)
 
     def set_vy_th(self,theta):
+        import numpy as np
         for i in range(self.n):
-            for k in range(i):
+            for k in range(i+1):
                 self.vy_th[i, k] = np.sum(np.multiply(np.multiply(self.g.eivs, self.lmatrix[:, i]), self.lmatrix[:, k]))
                 if (i != k):
                     self.vy_th[k, i] = self.vy_th[i, k]
         self.vy_th += self.vy_thu
 
     def set_dvy_th(self,theta):
+        import numpy as np
         for i in range(self.n):
             for k in range(self.n):
                 for r in range(self.nTheta):
@@ -172,6 +190,7 @@ class PB(object):
         self.dvy_th += self.dvy_thu
 
     def set_d2vy_th(self,theta):
+        import numpy as np
         for i in range(self.n):
             for k in range(self.n):
                 for s in range(self.nTheta):
@@ -193,6 +212,7 @@ class PB(object):
         self.d2vy_th += self.d2vy_thu
 
     def set_d2logpy_th(self,theta):
+        import numpy as np
         from numpy import trace as tr
         from numpy.linalg import solve as d
         from numpy import dot as m
@@ -210,15 +230,15 @@ class PB(object):
                                                                    m(s1[:, :, r], d(s0, s1[:, :, s])))), np.linalg.inv(s0)))),self.y.T)))
 
     def set_vhat(self,theta):
-        self.set_d2logpy_th(theta)
-        self.vhat = - np.linalg.inv(self.d2logpy_th - self.infoTheta)
+        import numpy as np
+        self.vhat = np.linalg.inv(self.d2logpy_th - self.infoTheta)
         self.vhat = 0.5 * (self.vhat + self.vhat.T)
 
-    def calculate_new_operators(self,theta):
+    def calculate_new_operators(self,theta,u):
         self.g.set_theta(theta)
-        self.set_vy_thu(theta,self.u)
-        self.set_dvy_thu(theta,self.u)
-        self.set_d2vy_thu(theta,self.u)
+        self.set_vy_thu(theta,u)
+        self.set_dvy_thu(theta,u)
+        self.set_d2vy_thu(theta,u)
         self.set_d012_lmatrix(theta)
         self.set_vy_th(theta)
         self.set_dvy_th(theta)
@@ -250,6 +270,14 @@ class PB(object):
         scatter(thetas[1, burnin:end()], thetas[2, burnin:end()], '.')
     """
 
+    def mcmc_init(self):
+        print "Calculating relevant operators...\n"
+        self.calculate_new_operators(self.thetas[:, 0], self.us[:, 0])
+        self.set_vhat(self.thetas[:, 0])
+        for i in range(self.n):
+            self.y[i] = self.ys[i, 0] = self.compute_L_i(self.thetas[:, 0], self.us[:, 0], i)
+        print "Finished calculating operators!\n"
+
 
 if __name__ == "__main__":
 
@@ -257,45 +285,37 @@ if __name__ == "__main__":
     import numpy as np
 
     pb = PB()
-
-    print "Calculating relevant operators...\n"
-    pb.calculate_new_operators(pb.thetas[:, 0])
-    pb.set_vhat(pb.thetas[:, 0])
-    print "Finished calculating operators!\n"
-
-    rejected = 0
+    pb.mcmc_init()
 
     print "Beginning MCMC procedure\n"
+    rejected = 0
     while pb.k < pb.K:
 
-        if (pb.k % 500) == 0:
-            print pb.k
-
         # Restricted to be nonnegative
-        pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1] + np.sqrt(pb.alph) * np.dot(np.linalg.cholesky(pb.vhat), truncnorm.rvs(0,np.Infinity, size = pb.nTheta))
-
-        for i in range(pb.n):
-            pb.ys[i, pb.k] = pb.compute_L_i(pb.thetas[:, pb.k], pb.a[:, pb.k  - pb.burnin],i)
-        pb.y = pb.ys[:, pb.k]
-
-        try:
-            acc=pb.acceptance(pb.thetas[:, pb.k], pb.thetas[:, pb.k - 1], pb.y)
-        finally:
-            pass
+        pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1] + np.sqrt(pb.alph) * np.dot(np.linalg.cholesky(pb.vhat),
+                                                                                truncnorm.rvs(0,np.Infinity, size = pb.nTheta))
+        acc=pb.acceptance(pb.thetas[:, pb.k], pb.thetas[:, pb.k - 1], pb.y)
 
         c=np.random.uniform(0,1,1)
         if c > acc :
             if pb.k > pb.burnin:
                 rejected += 1
-            pb.thetas[:, pb.k]=pb.thetas[:, pb.k - 1]
+            pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1]
+
         if pb.k < pb.burnin:
             pb.k += 1
             continue
-        pb.recalculate_kernel(pb.thetas[:, pb.k])
-        pb.calculate_new_operators(pb.thetas[:, pb.k])
 
-        EV=pb.EV_aP_given_theta_y(pb.y)
-        pb.a[:, pb.k + 1 - pb.burnin] = multivariate_normal(EV[0],EV[1])
+        pb.recalculate_kernel(pb.thetas[:, pb.k])
+        pb.calculate_new_operators(pb.thetas[:, pb.k], pb.us[:, pb.k])
+
+        mean, cov = pb.mean_cov_aP_given_theta_y(pb.y)
+        pb.a[:, pb.k] = multivariate_normal(mean, cov)
+
+        pb.us[:, pb.k] = pb.f_from_amp(pb.a[:, pb.k])
+        for i in range(pb.n):
+            pb.y[i] = pb.compute_L_i(pb.thetas[:, pb.k], pb.us[:, pb.k], i)
+        pb.ys[:, pb.k] = pb.y
         pb.k += 1
 
     # MCMC acceptance rate for theta

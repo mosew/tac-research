@@ -13,24 +13,33 @@ class Green1_eigen(object):
         self.P = P
         self.T = T
         self.theta = theta
-        self.eifs = [0.0] * P
+        self.eifs = [lambda x: 0] * P
 
         import numpy as np
         self.eivs = np.zeros(P)
         self.deivs = np.zeros((P, theta.shape[0]))
         self.d2eivs = np.zeros((P, theta.shape[0], theta.shape[0]))
 
-        from math import pi, sqrt, sin
+        from numpy import pi, sqrt, sin
 
-        for j in range(self.P):
-            self.eivs[j] = self.theta[0] * (self.T ** 2) / ((j * pi) + pi / 2) ** 2
-            self.eifs[j] = lambda s: sqrt(2 / self.T) * sin((s / self.T) * (j * pi - pi / 2))
-            self.deivs[j] = (self.T ** 2) / ((j * pi) + pi / 2) ** 2
-            self.d2eivs[j] = 0
+        t = np.arange(0,self.T, 5.)
+
+        self.eifs = [(lambda s: (sqrt(2./self.T) * sin((s/self.T) * ((j+1) * pi - pi / 2.)))) for j in range(self.P)]
+
+        for j in np.arange(1, self.P + 1):
+            self.eivs[j-1] = self.theta[0] * (self.T ** 2) / ((j * pi) + pi / 2) ** 2
+            # self.eifs[j-1] = lambda s: sqrt(2. / self.T) * sin((s / self.T) * (np.dot(j, pi) - pi / 2))
+            self.deivs[j-1] = (self.T ** 2) / ((j * pi) + pi / 2) ** 2
+            self.d2eivs[j-1] = 0
 
     def set_theta(self,theta):
-        from math import pi
+        from numpy import pi
         for j in range(self.P):
             self.eivs[j] = theta[0] * (self.T ** 2) / ((j * pi) + pi / 2) ** 2
             self.deivs[j] = (self.T ** 2) / ((j * pi) + pi / 2) ** 2
             self.d2eivs[j] = 0
+
+
+if __name__ == "__main__":
+    import numpy as np
+    g = Green1_eigen(8, 100., np.array([1., 1., 1.]))

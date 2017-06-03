@@ -2,21 +2,27 @@ class PB(object):
 
     def __init__(self):
 
-        self.P = 8
-        self.T = 5*276
-        self.n = 276
-        self.tau = 5.
-        self.burnin = 4
-        self.K = 10
-        self.alph = 3333
+        import numpy as np
         self.nTheta = 3
+        self.burnin = 20
+        self.K = 300
+        self.thetas = np.zeros((self.nTheta, self.K))
+        self.thetas[:, 0] = [5., 1., 1.]
+
+        from Parabolic_System import Parabolic_System
+        self.Z = Parabolic_System(self.thetas[1,0],self.thetas[2,0])
+        self.Z.define_operators()
+
+
+        self.P = 8
+        self.T = self.Z.T
+        self.n = self.Z.n
+        self.tau = self.Z.tau
+        self.alph = 100
         # What step of the MCMC are we on?
         self.k = 1
 
-        import numpy as np
         self.infoTheta = np.array([[0, 0, 0],[1.6e-7, 0, 0],[0, 1e-2, 0]])
-        self.thetas = np.zeros((self.nTheta, self.K))
-        self.thetas[:, 0] = [5., 1., 1.]
         self.t = np.linspace(self.tau, self.T, self.n)
         self.a = np.zeros((self.P, self.K))
         self.ys = np.zeros((self.n, self.K))
@@ -43,10 +49,6 @@ class PB(object):
         from scipy.stats import exponnorm
         self.us[:, 0] = [exponnorm.pdf((x-10.)/20., 0.5) for x in np.arange(self.tau, (self.n + 1)*self.tau, self.tau)]
 
-        from Parabolic_System import Parabolic_System
-        self.Z = Parabolic_System(self.thetas[1,0],self.thetas[2,0])
-        self.Z.define_operators()
-
         self.conv_kernel = lambda x: np.dot(self.Z.CNhat, np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau))), self.Z.BNhat))
         self.dconv_kernel_th1 = lambda x: np.dot(self.Z.CNhat, int(np.floor_divide(x, self.tau)) * np.dot(self.Z.dANhat_dq1, np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau)-1)), self.Z.BNhat)))
         self.d2conv_kernel_th1 = lambda x: np.dot(self.Z.CNhat,
@@ -63,6 +65,7 @@ class PB(object):
 
     def recalculate_kernel(self,theta):
         from Parabolic_System import Parabolic_System
+        import numpy as np
         self.Z = Parabolic_System(theta[1],theta[2])
         self.Z.define_operators()
 
@@ -103,11 +106,12 @@ class PB(object):
 
     def f_from_amp(self,amp):
         import numpy as np
-        return lambda x: np.dot(amp, np.array([self.g.eifs[j](x) for j in range(amp.shape[0])]))
+        return np.dot(amp, np.array([self.g.eifs[j](self.t) for j in range(amp.shape[0])]))
 
     # MCMC help
     def p_y_given_theta(self,theta,y):
         from scipy.stats import multivariate_normal
+        import numpy as np
         v = 0.5*(self.vy_th + self.vy_th.T)
         p_y_given_th = multivariate_normal.pdf(self.y, np.zeros(self.n), v)
         return p_y_given_th
@@ -118,11 +122,12 @@ class PB(object):
         return truncnorm.pdf(theta[1], 0, np.Infinity, 0.0046, 0.0006) * truncnorm.pdf(theta[2],0, np.Infinity, 1.23, 0.12)
 
     def acceptance(self,thetatry,thetaprev,y):
+        import numpy as np
         p_thetatry = self.p_theta(thetatry)
         p_thetaprev = self.p_theta(thetaprev)
-        num = self.p_y_given_theta(thetatry,y) * p_thetatry
-        den = self.p_y_given_theta(thetaprev,y) * p_thetaprev
-        return min(1, num / den)
+        num = np.log(self.p_y_given_theta(thetatry,y) * p_thetatry)
+        den = np.log(self.p_y_given_theta(thetaprev,y) * p_thetaprev)
+        return np.exp(min(0, num - den))
 
     def mean_cov_aP_given_theta_y(self,y):
         import numpy as np
@@ -246,77 +251,97 @@ class PB(object):
         self.set_d2logpy_th(theta)
         # self.set_vhat(theta)
 
-    """
-    def plot_mcmc_results(self):
-        fks = cell(1, K - burnin)
-
-        # pillonetto_bell/src/mcmc.m:136
-        for i in arange(1, K - burnin).reshape(-1):
-            fks[i] = f_from_a_eifs(a[:, i].T, eifs)  # pillonetto_bell/src/mcmc.m:138
-
-        fL_fU_fM = confidence_limits(fks)  # pillonetto_bell/src/mcmc.m:141
-        fL = fL_fU_fM[1]
-        # pillonetto_bell/src/mcmc.m:142
-        fU = fL_fU_fM[2]
-        # pillonetto_bell/src/mcmc.m:143
-        fM = fL_fU_fM[3]
-        # pillonetto_bell/src/mcmc.m:144
-        plot(fM[t], 'b')
-        hold('on')
-        plot(sampled_u, 'ko')
-        plot(fL[t], 'r--')
-        plot(fU[t], 'r--')
-        # Scatterplot thetas figure
-        scatter(thetas[1, burnin:end()], thetas[2, burnin:end()], '.')
-    """
-
     def mcmc_init(self):
-        print "Calculating relevant operators...\n"
+        print "Calculating relevant matrices...\n"
         self.calculate_new_operators(self.thetas[:, 0], self.us[:, 0])
         self.set_vhat(self.thetas[:, 0])
         for i in range(self.n):
             self.y[i] = self.ys[i, 0] = self.compute_L_i(self.thetas[:, 0], self.us[:, 0], i)
-        print "Finished calculating operators!\n"
+        print "Finished calculating matrices!\n"
+
+    def plot_mcmc_results(self, loaded = False):
+        import matplotlib.pyplot as plt
+        import cPickle as pickle
+
+        if loaded:
+            self.us = pickle.load(open("us.pkl", "rb"))
+            self.ys = pickle.load(open("ys.pkl", "rb"))
+            self.thetas = pickle.load(open("thetas.pkl", "rb"))
+
+        fL, fM, fU = self.confidence_limits()
+        fig1, ax1 = plt.subplots()
+        ax1.plot(self.t, fM, color='b')
+        ax1.plot(self.t, self.Z.u_total.reshape(self.n), 'ko')
+        ax1.plot(self.t, fL, 'r--')
+        ax1.plot(self.t, fU, 'r--')
+        # Scatterplot thetas figure
+        fig2, ax2 = plt.subplots()
+        ax2.scatter(self.thetas[1, self.burnin:], self.thetas[2, self.burnin:])
+        plt.show()
+
+    def confidence_limits(self):
+        from numpy import percentile, mean
+        fL = percentile(self.us[:, self.burnin:], q=2, axis=1)
+        fU = percentile(self.us[:, self.burnin:], q=98, axis=1)
+        fM = mean(self.us[:,self.burnin:], axis=1)
+        return fL, fM, fU
 
 
-if __name__ == "__main__":
+    def mcmc(self):
+        from scipy.stats import norm, truncnorm, multivariate_normal
+        import numpy as np
+        import cPickle as pickle
 
-    from scipy.stats import norm, truncnorm, multivariate_normal
-    import numpy as np
+        pb.mcmc_init()
 
-    pb = PB()
-    pb.mcmc_init()
+        print "Beginning MCMC procedure\n"
 
-    print "Beginning MCMC procedure\n"
-    rejected = 0
-    while pb.k < pb.K:
+        rejected = int(0)
 
-        # Restricted to be nonnegative
-        pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1] + np.sqrt(pb.alph) * np.dot(np.linalg.cholesky(pb.vhat),
-                                                                                truncnorm.rvs(0,np.Infinity, size = pb.nTheta))
-        acc=pb.acceptance(pb.thetas[:, pb.k], pb.thetas[:, pb.k - 1], pb.y)
+        while pb.k < pb.K:
 
-        c=np.random.uniform(0,1,1)
-        if c > acc :
-            if pb.k > pb.burnin:
-                rejected += 1
-            pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1]
+            assert(all(x > 0. for x in pb.thetas[:, pb.k-1]))
 
-        if pb.k < pb.burnin:
+            # Restricted to be nonnegative
+            pb.thetas[:, pb.k] = multivariate_normal.rvs(mean = pb.thetas[:, pb.k - 1], cov=np.sqrt(pb.alph)*pb.vhat)
+
+            if any(x <= 0. for x in pb.thetas[:, pb.k]):
+                acc = 0.
+            else:
+                acc=pb.acceptance(pb.thetas[:, pb.k], pb.thetas[:, pb.k - 1], pb.y)
+
+            c=np.random.uniform(0,1,1)
+            if c > acc:
+                if pb.k > pb.burnin:
+                    rejected += 1
+                pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1]
+
+            if pb.k < pb.burnin:
+                pb.k += 1
+                continue
+
+            pb.recalculate_kernel(pb.thetas[:, pb.k])
+            pb.calculate_new_operators(pb.thetas[:, pb.k], pb.us[:, pb.k])
+
+            mean, cov = pb.mean_cov_aP_given_theta_y(pb.ys[:, pb.k-1])
+
+            pb.a[:, pb.k] = multivariate_normal.rvs(mean=mean, cov=cov)
+
+            pb.us[:, pb.k] = pb.f_from_amp(pb.a[:, pb.k])
+
+            for i in range(pb.n):
+                pb.ys[i, pb.k] = pb.compute_L_i(pb.thetas[:, pb.k], pb.us[:, pb.k], i)
             pb.k += 1
-            continue
 
-        pb.recalculate_kernel(pb.thetas[:, pb.k])
-        pb.calculate_new_operators(pb.thetas[:, pb.k], pb.us[:, pb.k])
+        # MCMC acceptance rate for theta
+        print "MCMC complete."
+        print "Acceptance rate: ", 1 - rejected / (pb.k - pb.burnin)
 
-        mean, cov = pb.mean_cov_aP_given_theta_y(pb.y)
-        pb.a[:, pb.k] = multivariate_normal(mean, cov)
+        pickle.dump(pb.us, open("us.pkl", "wb"))
+        pickle.dump(pb.ys, open("ys.pkl", "wb"))
+        pickle.dump(pb.thetas, open("thetas.pkl", "wb"))
 
-        pb.us[:, pb.k] = pb.f_from_amp(pb.a[:, pb.k])
-        for i in range(pb.n):
-            pb.y[i] = pb.compute_L_i(pb.thetas[:, pb.k], pb.us[:, pb.k], i)
-        pb.ys[:, pb.k] = pb.y
-        pb.k += 1
-
-    # MCMC acceptance rate for theta
-    print "Acceptance rate: " + 1 - rejected / (pb.k - pb.burnin)
+if __name__=="__main__":
+    pb = PB()
+    pb.mcmc()
+    pb.plot_mcmc_results(True)

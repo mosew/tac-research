@@ -4,14 +4,16 @@ class Parabolic_System(object):
 
         self.N = 32
         self.tau = 5.
-        self.T = 276
+        self.T = 60*5.
         self.q2 = q2
         self.q1 = q1
         self.n = int(self.T/self.tau)
         self.m = 0 # number of training episodes
+        self.testep = 0
 
         import numpy as np
-        self.u_total = np.zeros((self.m+1,self.n))
+        from scipy.stats import exponnorm
+        self.u_total = np.array([exponnorm.pdf((x-30.)/40., 0.5) for x in np.arange(self.tau, (self.n + 1)*self.tau, self.tau)])
         # Here the test episode should have row index 0, not m+1
         self.y_total = None
         self.BN = None

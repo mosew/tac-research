@@ -4,25 +4,26 @@ class PB(object):
 
         import numpy as np
         self.nTheta = 3
-        self.burnin = 20
-        self.K = 300
+        self.P = 20
+        self.burnin = 6
+        self.K = 20
+
         self.thetas = np.zeros((self.nTheta, self.K))
-        self.thetas[:, 0] = [5., 1., 1.]
+        self.thetas[:, 0] = [.1, .0046, 1.23]
 
         from Parabolic_System import Parabolic_System
         self.Z = Parabolic_System(self.thetas[1,0],self.thetas[2,0])
         self.Z.define_operators()
 
-
-        self.P = 8
         self.T = self.Z.T
         self.n = self.Z.n
         self.tau = self.Z.tau
-        self.alph = 100
+        self.alph = 10000.
+
         # What step of the MCMC are we on?
         self.k = 1
 
-        self.infoTheta = np.array([[0, 0, 0],[1.6e-7, 0, 0],[0, 1e-2, 0]])
+        self.infoTheta = np.array([[0, 0, 0],[0, 3e6, 0],[0, 0, 1e2]])
         self.t = np.linspace(self.tau, self.T, self.n)
         self.a = np.zeros((self.P, self.K))
         self.ys = np.zeros((self.n, self.K))
@@ -45,12 +46,16 @@ class PB(object):
         from rkhs import Green1_eigen
         self.g = Green1_eigen(self.P,self.T,self.thetas[:, 0])
 
-        # This is used for the initial calculation of V(y|theta, u) and its derivatives wrt theta. It should be such that the initial operators are nonsingular.
-        from scipy.stats import exponnorm
-        self.us[:, 0] = [exponnorm.pdf((x-10.)/20., 0.5) for x in np.arange(self.tau, (self.n + 1)*self.tau, self.tau)]
+        # This is used for the initial calculation of V(y|theta, u) and its derivatives wrt theta.
+        # It should be such that the initial operators are nonsingular.
+        self.us[:, 0] = self.Z.u_total
 
         self.conv_kernel = lambda x: np.dot(self.Z.CNhat, np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau))), self.Z.BNhat))
-        self.dconv_kernel_th1 = lambda x: np.dot(self.Z.CNhat, int(np.floor_divide(x, self.tau)) * np.dot(self.Z.dANhat_dq1, np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau)-1)), self.Z.BNhat)))
+        self.dconv_kernel_th1 = lambda x: np.dot(self.Z.CNhat,
+                                                 int(np.floor_divide(x, self.tau)) *
+                                                 np.dot(self.Z.dANhat_dq1,
+                                                        np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau)-1)),
+                                                               self.Z.BNhat)))
         self.d2conv_kernel_th1 = lambda x: np.dot(self.Z.CNhat,
                                                   np.dot(int(np.floor_divide(x, self.tau)) *
                                                         (np.dot(self.Z.d2ANhat_d2q1,
@@ -97,7 +102,7 @@ class PB(object):
 
     def convolve_eifs(self,theta):
         import numpy as np
-        convolved_eifs = np.zeros((self.P,self.n))
+        convolved_eifs = np.zeros((self.P, self.n))
         for i in range(self.n):
             for j in range(self.P):
                 convolved_eifs[j, i] = self.compute_L_i(theta, self.g.eifs[j], i)
@@ -112,9 +117,7 @@ class PB(object):
     def p_y_given_theta(self,theta,y):
         from scipy.stats import multivariate_normal
         import numpy as np
-        v = 0.5*(self.vy_th + self.vy_th.T)
-        p_y_given_th = multivariate_normal.pdf(self.y, np.zeros(self.n), v)
-        return p_y_given_th
+        return multivariate_normal.pdf(self.y, np.zeros(self.n), self.vy_th)
 
     def p_theta(self,theta):
         from scipy.stats import truncnorm
@@ -175,7 +178,7 @@ class PB(object):
         for i in range(self.n):
             for k in range(i+1):
                 self.vy_th[i, k] = np.sum(np.multiply(np.multiply(self.g.eivs, self.lmatrix[:, i]), self.lmatrix[:, k]))
-                if (i != k):
+                if i != k:
                     self.vy_th[k, i] = self.vy_th[i, k]
         self.vy_th += self.vy_thu
 
@@ -236,7 +239,7 @@ class PB(object):
 
     def set_vhat(self,theta):
         import numpy as np
-        self.vhat = np.linalg.inv(self.d2logpy_th - self.infoTheta)
+        self.vhat = np.linalg.inv(- self.d2logpy_th + self.infoTheta)
         self.vhat = 0.5 * (self.vhat + self.vhat.T)
 
     def calculate_new_operators(self,theta,u):
@@ -249,7 +252,7 @@ class PB(object):
         self.set_dvy_th(theta)
         self.set_d2vy_th(theta)
         self.set_d2logpy_th(theta)
-        # self.set_vhat(theta)
+        self.set_vhat(theta)
 
     def mcmc_init(self):
         print "Calculating relevant matrices...\n"
@@ -286,60 +289,63 @@ class PB(object):
         fM = mean(self.us[:,self.burnin:], axis=1)
         return fL, fM, fU
 
-
     def mcmc(self):
-        from scipy.stats import norm, truncnorm, multivariate_normal
+        from scipy.stats import norm, multivariate_normal
         import numpy as np
         import cPickle as pickle
 
-        pb.mcmc_init()
+        self.mcmc_init()
 
         print "Beginning MCMC procedure\n"
 
         rejected = int(0)
 
-        while pb.k < pb.K:
+        while self.k < self.K:
+            print self.k-1, self.thetas[:, self.k-1]
+            print self.k, self.thetas[:, self.k]
 
-            assert(all(x > 0. for x in pb.thetas[:, pb.k-1]))
+            assert(all(x > 0. for x in self.thetas[:, self.k-1]))
 
             # Restricted to be nonnegative
-            pb.thetas[:, pb.k] = multivariate_normal.rvs(mean = pb.thetas[:, pb.k - 1], cov=np.sqrt(pb.alph)*pb.vhat)
-
-            if any(x <= 0. for x in pb.thetas[:, pb.k]):
+            self.thetas[:, self.k] = multivariate_normal.rvs(mean=self.thetas[:, self.k - 1],
+                                                             cov=np.sqrt(self.alph)*self.vhat)
+            print self.k, self.thetas[:, self.k]
+            if any(x <= 0. for x in self.thetas[:, self.k]):
                 acc = 0.
             else:
-                acc=pb.acceptance(pb.thetas[:, pb.k], pb.thetas[:, pb.k - 1], pb.y)
-
+                print "k=", self.k, "; calculating acceptance ratio."
+                acc=self.acceptance(self.thetas[:, self.k], self.thetas[:, self.k - 1], self.y)
             c=np.random.uniform(0,1,1)
             if c > acc:
-                if pb.k > pb.burnin:
+                if self.k > self.burnin:
                     rejected += 1
-                pb.thetas[:, pb.k] = pb.thetas[:, pb.k - 1]
+                self.thetas[:, self.k] = self.thetas[:, self.k - 1]
 
-            if pb.k < pb.burnin:
-                pb.k += 1
+            self.recalculate_kernel(self.thetas[:, self.k])
+            self.calculate_new_operators(self.thetas[:, self.k], self.us[:, self.k])
+
+            if self.k < self.burnin:
+                self.k += 1
                 continue
 
-            pb.recalculate_kernel(pb.thetas[:, pb.k])
-            pb.calculate_new_operators(pb.thetas[:, pb.k], pb.us[:, pb.k])
+            mean, cov = self.mean_cov_aP_given_theta_y(self.ys[:, self.k-1])
 
-            mean, cov = pb.mean_cov_aP_given_theta_y(pb.ys[:, pb.k-1])
+            self.a[:, self.k] = multivariate_normal.rvs(mean=mean, cov=cov)
 
-            pb.a[:, pb.k] = multivariate_normal.rvs(mean=mean, cov=cov)
+            self.us[:, self.k] = self.f_from_amp(self.a[:, self.k])
 
-            pb.us[:, pb.k] = pb.f_from_amp(pb.a[:, pb.k])
-
-            for i in range(pb.n):
-                pb.ys[i, pb.k] = pb.compute_L_i(pb.thetas[:, pb.k], pb.us[:, pb.k], i)
-            pb.k += 1
+            for i in range(self.n):
+                self.ys[i, self.k] = self.compute_L_i(self.thetas[:, self.k], self.us[:, self.k], i)
+            self.k += 1
+            print "k=", self.k
 
         # MCMC acceptance rate for theta
         print "MCMC complete."
-        print "Acceptance rate: ", 1 - rejected / (pb.k - pb.burnin)
+        print "Acceptance rate: ", 1-rejected/(self.k-self.burnin)
 
-        pickle.dump(pb.us, open("us.pkl", "wb"))
-        pickle.dump(pb.ys, open("ys.pkl", "wb"))
-        pickle.dump(pb.thetas, open("thetas.pkl", "wb"))
+        pickle.dump(self.us, open("us.pkl", "wb"))
+        pickle.dump(self.ys, open("ys.pkl", "wb"))
+        pickle.dump(self.thetas, open("thetas.pkl", "wb"))
 
 if __name__=="__main__":
     pb = PB()

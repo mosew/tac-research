@@ -26,8 +26,7 @@ class Green1_eigen(object):
 
         for j in np.arange(1, self.P + 1):
             self.eivs[j-1] = self.theta[0] * (self.T ** 2) / ((j * pi) + pi / 2) ** 2
-            self.deivs[j-1] = (self.T ** 2) / ((j * pi) + pi / 2) ** 2
-            self.d2eivs[j-1] = 0
+            self.deivs[j-1, 0] = (self.T ** 2) / ((j * pi) + pi / 2) ** 2
 
     def set_theta(self,theta):
         from numpy import pi

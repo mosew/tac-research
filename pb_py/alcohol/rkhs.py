@@ -1,6 +1,4 @@
 # rkhs
-
-
 class Green1_eigen(object):
     """
     Returns an object with two useful attributes:
@@ -33,7 +31,7 @@ class Green1_eigen(object):
         for j in range(self.P):
             self.eivs[j] = theta[0] * (self.T ** 2) / ((j * pi) + pi / 2) ** 2
             self.deivs[j] = (self.T ** 2) / ((j * pi) + pi / 2) ** 2
-            self.d2eivs[j] = 0
+            self.d2eivs[j] = 0.
 
 
 if __name__ == "__main__":

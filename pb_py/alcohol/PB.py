@@ -3,20 +3,23 @@ class PB(object):
     def __init__(self):
 
         import numpy as np
+        # only used for plotting.
+        self.u = np.array([0, 12.25, 24.5, 36.75, 49, 47, 45, 47.333, 49.667, 52, 49.25, 46.5, 43.75, 41, 39, 37, 36, 35, 34, 32.333, 30.667, 29, 27.667, 26.333, 25, 24.333, 23.667, 23, 22.167, 21.333, 20.5, 19.667, 18.833, 18, 17.333, 16.667, 16, 15, 14, 13, 12, 11, 10, 6.6667, 3.3333, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        self.y = np.array([1.1895e-10, 0, 0, 0, 1.7657, 6.1143, 11.289, 16.125, 19.03, 19.934, 20.982, 21.791, 24.744, 28.649, 32.077, 34.315, 34.315, 32.839, 32.553, 32.22, 31.887, 31.41, 31.077, 30.744, 30.601, 30.41, 30.458, 30.077, 29.887, 29.649, 29.22, 28.791, 28.553, 28.268, 28.125, 28.315, 28.172, 27.887, 27.649, 27.125, 26.934, 26.934, 26.649, 26.125, 25.41, 24.22, 23.22, 22.125, 21.268, 20.553, 19.791, 19.315, 18.506, 17.601, 16.744, 16.077, 15.315, 14.934, 14.553, 14.315, 13.839, 13.172, 12.363, 11.458, 10.934, 10.41, 10.03, 9.4105, 8.9343, 8.5533, 8.22, 7.8867, 7.5057, 6.9343, 6.4581, 6.2676, 6.1248, 6.22, 6.3152, 6.1724, 5.8867, 5.5533, 5.2676, 5.1248, 5.3152, 5.1724, 4.8867, 4.5533, 4.2676, 4.22, 4.1724, 3.8867, 3.5533, 3.2676, 3.22, 3.1724, 2.8867, 2.5533, 2.2676, 2.22, 2.1724, 1.8867, 1.5533, 1.2676, 1.1248, 1.22, 1.22, 1.22, 1.3152, 1.1724, 0.88667, 0.55333, 0.26762, 0.12476, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.24095, 0.20952, 0.14667, 0.073333, 0.010476, 0, 1.6217e-10, 2.5312e-12])
+        self.pad = 8
+
+        self.u = np.concatenate((np.zeros(self.pad), self.u))
+        self.y = np.concatenate((np.zeros(self.pad), self.y))
+
         self.nTheta = 3
         self.P = 8
         self.burnin = 10
         self.K = 60
-        self.n = 60
-        self.tau = 0.1
+        self.n = self.u.shape[0]
+        self.tau = 1./12.
         self.T = self.n * self.tau
         self.t = np.linspace(self.tau, self.T, self.n)
-        self.alph = 3.
-
-        # Actual sampled values. Attribute u only used for plotting.
-        from scipy.stats import exponnorm
-        self.y = np.array([exponnorm.pdf(x-3., 1.5) for x in np.arange(0.,self.T,self.tau)])
-        self.u = np.concatenate(([1.],np.zeros(self.n-1)),axis=0)
+        self.alph = 1000000.
 
         # What step of the MCMC are we on?
         self.k = 1
@@ -34,6 +37,8 @@ class PB(object):
     def mcmc_init(self):
         from pbMatrices import pbMatrices
         print "Calculating matrices...\n"
+        self.mats_prev = pbMatrices(self.thetas[:, 0], self.u, self.ys[:, 0], self.P, self.T, self.n, self.tau, self.k - 1)
+        self.y = np.array([self.mats_prev.compute_L_i(self.thetas[:, 0], self.u, i) for i in range(self.n)])
         self.mats_prev = pbMatrices(self.thetas[:, 0], self.u, self.y, self.P, self.T, self.n, self.tau, self.k - 1)
         self.mats_try = self.mats_prev
         print "Finished calculating matrices!\n"
@@ -149,6 +154,8 @@ class PB(object):
         fig1, ax1 = plt.subplots()
         if self.u is not None:
             ax1.plot(self.t, self.u, 'ko')
+        if self.y is not None:
+            ax1.plot(self.t, self.y, 'go')
         ax1.plot(self.t, fM, color='b')
         ax1.plot(self.t, fL, 'r--')
         ax1.plot(self.t, fU, 'r--')

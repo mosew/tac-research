@@ -20,10 +20,10 @@ y = np.array(
     [.01 * exponnorm.pdf((x - 30.) / 40., 0.5) for x in np.arange(tau, (n + 1) * tau, tau)])
 
 u_final = np.array(
-    [400. * exponnorm.pdf((x - 30.) / 4., 0.3) for x in np.linspace(tau, n * tau, n)])
+    [400. * exponnorm.pdf((x - 30.) / 4https://giphy.com/gifs/C0mVQRWkvO7kI/html5., 0.3) for x in np.linspace(tau, n * tau, n)])
 y_final = np.ones(u_final.shape)
 
-Z = Parabolic_System(theta[1],theta[2],u, n)
+Z = Parabolic_System(theta[0],theta[1],u, n)
 pbM = pbMatrices(theta, u, y, P, T, n, tau, k)
 pb = PB()
 

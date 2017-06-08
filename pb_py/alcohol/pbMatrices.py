@@ -12,11 +12,11 @@ class pbMatrices(object):
         self.u = u
 
         from Parabolic_System import Parabolic_System
-        self.Z = Parabolic_System(self.theta[1],self.theta[2], self.u, self.n, self.tau)
+        self.Z = Parabolic_System(self.theta[0],self.theta[1], self.u, self.n, self.tau)
         self.Z.define_operators()
 
         import numpy as np
-        self.infoTheta = np.array([[0, 0, 0],[0, 3e6, 0],[0, 0, 1e2]])
+        self.infoTheta = np.array([[(.0006)**(-2), 0],[0, (0.12)**(-2)]])
         # Important matrices to be calculated
         self.vhat = np.zeros((self.nTheta, self.nTheta))
         self.lmatrix = np.zeros((self.P, self.n))
@@ -74,7 +74,7 @@ class pbMatrices(object):
                           )
 
     def reset_kernel(self,theta):
-        self.Z.reset_q_u(theta[1],theta[2],self.u)
+        self.Z.reset_q_u(theta[0],theta[1],self.u)
 
     # Convolution kernel
     def compute_L_i(self, theta, f, i):
@@ -107,12 +107,12 @@ class pbMatrices(object):
         for j in range(self.P):
             eifsjsamp = [self.g.eifs[j](k*self.tau) for k in range(self.n)]
             for i in range(self.n):
-                dlmatrix[j, i, 1] = sum([eifsjsamp[k]*dkernsamp[i-k-1] for k in range(i)])
-                d2lmatrix[j, i, 1, 1] = sum([eifsjsamp[k]*d2kernsamp[i-k-1] for k in range(i)])
-        dlmatrix[:, :, 2] = lmatrix / theta[2]
+                dlmatrix[j, i, 0] = sum([eifsjsamp[k]*dkernsamp[i-k-1] for k in range(i)])
+                d2lmatrix[j, i, 0, 0] = sum([eifsjsamp[k]*d2kernsamp[i-k-1] for k in range(i)])
+        dlmatrix[:, :, 1] = lmatrix / theta[1]
 
-        d2lmatrix[:, :, 1, 2] = dlmatrix[:, :, 1] / theta[2]
-        d2lmatrix[:, :, 2, 1] = d2lmatrix[:, :, 1, 2]
+        d2lmatrix[:, :, 0, 1] = dlmatrix[:, :, 1] / theta[1]
+        d2lmatrix[:, :, 1, 0] = d2lmatrix[:, :, 0, 1]
         return lmatrix, dlmatrix, d2lmatrix
 
     def set_d012_lmatrix(self, theta):
@@ -122,7 +122,7 @@ class pbMatrices(object):
         import numpy as np
         vy_thu = np.zeros(self.vy_thu.shape)
         for i in range(self.n):
-            vy_thu[i, i] = theta[0]**2
+            vy_thu[i, i] = theta[1]**2
         return np.array(vy_thu)
 
     def set_vy_thu(self,theta,u):
@@ -132,7 +132,7 @@ class pbMatrices(object):
         import numpy as np
         dvy_thu = np.zeros(self.dvy_thu.shape)
         for i in range(self.n):
-            dvy_thu[i, i, 0] = 2*theta[0]
+            dvy_thu[i, i, 0] = 2*theta[1]
         return np.array(dvy_thu)
 
     def set_dvy_thu(self,theta,u):
@@ -237,7 +237,7 @@ class pbMatrices(object):
         self.vhat = 0.5 * (self.vhat + np.transpose(self.vhat))
 
     def set_theta_update_operators(self,theta, u, y):
-        self.Z.reset_q_u(theta[1],theta[2],u)
+        self.Z.reset_q_u(theta[0],theta[1],u)
         self.g.set_theta(theta)
         self.set_vy_thu(theta,u)
         self.set_dvy_thu(theta,u)

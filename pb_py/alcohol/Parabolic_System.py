@@ -2,7 +2,7 @@ class Parabolic_System(object):
 
     def __init__(self, q1=.0046,q2=1.23, u_total=None, n = None, tau = 5.):
 
-        self.N = 16
+        self.N = 32
         self.tau = 1./12.
         self.n = n
         self.q2 = q2

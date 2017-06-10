@@ -1,6 +1,6 @@
 class pbMatrices(object):
 
-    def __init__(self, theta, u, y, P, T, n, tau, k):
+    def __init__(self, theta, u, y, P, T, n, tau, k, vhat=None):
         self.theta = theta
         self.nTheta = theta.shape[0]
         self.P = P
@@ -12,13 +12,16 @@ class pbMatrices(object):
         self.u = u
 
         from Parabolic_System import Parabolic_System
-        self.Z = Parabolic_System(self.theta[0],self.theta[1], self.u, self.n, self.tau)
+        self.Z = Parabolic_System(self.theta[1],self.theta[2], self.u, self.n, self.tau)
         self.Z.define_operators()
 
         import numpy as np
-        self.infoTheta = np.array([[(.0006)**(-2), 0],[0, (0.12)**(-2)]])
+        self.infoTheta = np.array([[0.,0.,0.], [0.,(.0006)**(-2), 0.],[0., 0.,(0.12)**(-2)]])
         # Important matrices to be calculated
-        self.vhat = np.zeros((self.nTheta, self.nTheta))
+        if vhat is not None:
+            self.vhat = vhat
+        else:
+            self.vhat = np.zeros((self.nTheta, self.nTheta))
         self.lmatrix = np.zeros((self.P, self.n))
         self.dlmatrix = np.zeros((self.P, self.n, self.nTheta))
         self.d2lmatrix = np.zeros((self.P, self.n, self.nTheta, self.nTheta))
@@ -32,55 +35,54 @@ class pbMatrices(object):
 
         from rkhs import Green1_eigen
         self.g = Green1_eigen(self.P,self.T,self.theta)
-
-        self.set_theta_update_operators(self.theta, self.u, self.y)
+        self.set_theta_update_operators(self.theta, self.u)
 
     def conv_kernel(self, x):
         import numpy as np
-        return np.dot(self.Z.CNhat, np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau))), self.Z.BNhat))
+        assert(x==float(x))
+        if int(x / self.tau)==0:
+            return 0.
+        else:
+            return np.dot(self.Z.CNhat, np.dot(np.linalg.matrix_power(self.Z.ANhat,
+                                                                      int(x/self.tau)-1),
+                                               self.Z.BNhat))
 
     def dconv_kernel_th1(self, x):
         import numpy as np
-        if int(np.floor_divide(x, self.tau)) <= 0:
+        if int(np.floor_divide(x, self.tau)) <= 1:
             return 0.
         else:
             return np.dot(self.Z.CNhat,
-                          int(np.floor_divide(x, self.tau)) *
+                          np.multiply(int(np.floor_divide(x, self.tau)-1.),
                           np.dot(self.Z.dANhat_dq1,
-                                 np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau)-1)),
-                                        self.Z.BNhat)))
+                                 np.dot(np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau)-2.)),
+                                        self.Z.BNhat))))
 
     def d2conv_kernel_th1(self, x):
         import numpy as np
-        if int(np.floor_divide(x, self.tau)) <= 0:
+        if int(np.floor_divide(x, self.tau)) <= 2:
             return 0.
-        if int(np.floor_divide(x, self.tau)) == 1:
-            return np.dot(self.Z.CNhat,
-                          np.dot(int(np.floor_divide(x, self.tau)) *
-                                 (np.dot(self.Z.d2ANhat_d2q1,
-                                         np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x, self.tau)) - 1))),
-                                 self.Z.BNhat))
         else:
             return np.dot(self.Z.CNhat,
-                          np.dot(int(np.floor_divide(x, self.tau)) *
+                          np.dot(int(np.floor_divide(x, self.tau)-1) *
                                  (np.dot(self.Z.d2ANhat_d2q1,
-                                         np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x,self.tau))-1)) +
-                                  (np.floor_divide(x, self.tau) - 1) * np.dot(self.Z.dANhat_dq1,
+                                         np.linalg.matrix_power(self.Z.ANhat, int(np.floor_divide(x,self.tau))-2)) +
+                                  (np.floor_divide(x, self.tau) - 2) * np.dot(self.Z.dANhat_dq1,
                                                                               np.linalg.matrix_power(self.Z.ANhat,
-                                                                                                     int(np.floor_divide(x, self.tau)) - 2)
+                                                                                                     int(np.floor_divide(x, self.tau)) - 3)
                                                                               )
                                   ),
                                  self.Z.BNhat)
                           )
 
     def reset_kernel(self,theta):
-        self.Z.reset_q_u(theta[0],theta[1],self.u)
+        self.Z.reset_q_u(theta[1],theta[2],self.u)
 
     # Convolution kernel
     def compute_L_i(self, theta, f, i):
         import numpy as np
         i+=1 # indexing in Python for i starts at 0 but we need it to start at 1. All signals have value 0 at t=0.
-        ti = np.arange(self.tau, (i+.1)*self.tau, self.tau)
+        ti = np.linspace(self.tau, i*self.tau, i)
         if type(f) is np.ndarray:
             fsamp = np.array(f[:i])
         else:
@@ -107,50 +109,53 @@ class pbMatrices(object):
         for j in range(self.P):
             eifsjsamp = [self.g.eifs[j](k*self.tau) for k in range(self.n)]
             for i in range(self.n):
-                dlmatrix[j, i, 0] = sum([eifsjsamp[k]*dkernsamp[i-k-1] for k in range(i)])
-                d2lmatrix[j, i, 0, 0] = sum([eifsjsamp[k]*d2kernsamp[i-k-1] for k in range(i)])
-        dlmatrix[:, :, 1] = lmatrix / theta[1]
+                dlmatrix[j, i, 1] = sum([eifsjsamp[k]*dkernsamp[i-k-1] for k in range(i)])
+                d2lmatrix[j, i, 1, 1] = sum([eifsjsamp[k]*d2kernsamp[i-k-1] for k in range(i)])
+        dlmatrix[:, :, 2] = lmatrix / theta[2]
 
-        d2lmatrix[:, :, 0, 1] = dlmatrix[:, :, 1] / theta[1]
-        d2lmatrix[:, :, 1, 0] = d2lmatrix[:, :, 0, 1]
+        d2lmatrix[:, :, 1, 2] = dlmatrix[:, :, 2] / theta[2]
+        d2lmatrix[:, :, 2, 1] = d2lmatrix[:, :, 1, 2]
         return lmatrix, dlmatrix, d2lmatrix
 
     def set_d012_lmatrix(self, theta):
         self.lmatrix, self.dlmatrix, self.d2lmatrix = self.compute_d012_lmatrix(theta)
 
-    def compute_vy_thu(self,theta,u):
+    def compute_vy_thu(self,theta):
         import numpy as np
         vy_thu = np.zeros(self.vy_thu.shape)
         for i in range(self.n):
-            vy_thu[i, i] = theta[1]**2
+            vy_thu[i, i] = (theta[0]*theta[2])**2
         return np.array(vy_thu)
 
-    def set_vy_thu(self,theta,u):
-        self.vy_thu = self.compute_vy_thu(theta,u)
+    def set_vy_thu(self,theta):
+        self.vy_thu = self.compute_vy_thu(theta)
 
-    def compute_dvy_thu(self,theta,u):
+    def compute_dvy_thu(self,theta):
         import numpy as np
         dvy_thu = np.zeros(self.dvy_thu.shape)
         for i in range(self.n):
-            dvy_thu[i, i, 0] = 2*theta[1]
+            dvy_thu[i, i, 0] = 2*theta[0]*(theta[2]**2)
+            dvy_thu[i, i, 2] = 2*theta[2]*(theta[0]**2)
         return np.array(dvy_thu)
 
-    def set_dvy_thu(self,theta,u):
-        self.dvy_thu = self.compute_dvy_thu(theta,u)
+    def set_dvy_thu(self,theta):
+        self.dvy_thu = self.compute_dvy_thu(theta)
 
-    def compute_d2vy_thu(self,theta,u):
+    def compute_d2vy_thu(self,theta):
         import numpy as np
         d2vy_thu = np.zeros(self.d2vy_thu.shape)
-        d2vy_thu[:, :, 0, 0] = 2 * np.identity(self.n)
+        d2vy_thu[:, :, 0, 0] = np.multiply(2*(theta[2]**2), np.identity(self.n))
+        d2vy_thu[:, :, 2, 2] = np.multiply(2*(theta[0]**2), np.identity(self.n))
+        d2vy_thu[:, :, 0, 2] = np.multiply(4*theta[0]*theta[2], np.identity(self.n))
+        d2vy_thu[:, :, 2, 0] = d2vy_thu[:, :, 0, 2]
         return d2vy_thu
 
-    def set_d2vy_thu(self,theta,u):
-        self.d2vy_thu = self.compute_d2vy_thu(theta,u)
+    def set_d2vy_thu(self,theta):
+        self.d2vy_thu = self.compute_d2vy_thu(theta)
 
     def compute_vy_th(self,theta):
         import numpy as np
         vy_th = np.zeros(self.vy_th.shape)
-
         for i in range(self.n):
             for k in range(i+1):
                 vy_th[i, k] = np.sum(np.multiply(np.multiply(self.g.eivs, self.lmatrix[:, i]), self.lmatrix[:, k]))
@@ -212,7 +217,7 @@ class pbMatrices(object):
     def set_d2vy_th(self,theta):
         self.d2vy_th = self.compute_d2vy_th(theta)
 
-    def set_d2logpy_th(self,theta, y):
+    def set_d2logpy_th(self,theta):
         import numpy as np
         from numpy import trace as tr
         from numpy.linalg import solve as d
@@ -227,24 +232,25 @@ class pbMatrices(object):
                 self.d2logpy_th[s, r] = -0.5 * (
                     tr(d(s0,(s2[:,:, s, r]))) -
                     tr(m(d(s0, s1[:, :, s]), d(s0,s1[:, :, r])) +
-                       m(m(y,(m(d(s0,(m(s1[:, :, s], d(s0, s1[:, :, r])) -
+                       m(m(self.y,(m(d(s0,(m(s1[:, :, s], d(s0, s1[:, :, r])) -
                                       s2[:, :, s, r] +
-                                      m(s1[:, :, r], d(s0, s1[:, :, s])))), np.linalg.inv(s0)))),np.transpose(y))))
+                                      m(s1[:, :, r], d(s0, s1[:, :, s])))), np.linalg.inv(s0)))),np.transpose(self.y))))
 
     def set_vhat(self,theta):
         import numpy as np
-        self.vhat = - np.linalg.inv(self.d2logpy_th - self.infoTheta)
+        self.vhat = np.linalg.inv(self.d2logpy_th - self.infoTheta)
         self.vhat = 0.5 * (self.vhat + np.transpose(self.vhat))
 
-    def set_theta_update_operators(self,theta, u, y):
-        self.Z.reset_q_u(theta[0],theta[1],u)
+    def set_theta_update_operators(self,theta, u):
+        self.theta = theta
+        self.Z.reset_q_u(theta[1],theta[2],u)
         self.g.set_theta(theta)
-        self.set_vy_thu(theta,u)
-        self.set_dvy_thu(theta,u)
-        self.set_d2vy_thu(theta,u)
+        self.set_vy_thu(theta)
+        self.set_dvy_thu(theta)
+        self.set_d2vy_thu(theta)
         self.set_d012_lmatrix(theta)
         self.set_vy_th(theta)
         self.set_dvy_th(theta)
         self.set_d2vy_th(theta)
-        self.set_d2logpy_th(theta, y)
+        self.set_d2logpy_th(theta)
         self.set_vhat(theta)

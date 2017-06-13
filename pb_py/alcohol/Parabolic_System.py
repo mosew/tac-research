@@ -70,7 +70,7 @@ class Parabolic_System(object):
                                                   self.AN),axis=1)),
                                             axis=0)
                                         ))
-
+        # Najfeld-Havel results with F = expm
         self.ANhat = np.array(d012ANhat_q1[:(self.N + 1), :(self.N + 1)])
         assert(self.ANhat.shape == (self.N+1,self.N+1))
         self.dANhat_dq1 = np.array(d012ANhat_q1[:(self.N + 1), (self.N + 1):(2*self.N + 2)])
@@ -132,11 +132,11 @@ class Parabolic_System(object):
         self.define_operators(self.u)
 
     def define_operators(self, us=None):
-
         self.build_final_matrices()
         self.build_Kq()
         self.build_AN()
         self.build_BN()
         self.build_expm_stuff()
         self.build_BNhat()
+        self.build_dBNhat_dq()
         #self.build_Phi(us)
